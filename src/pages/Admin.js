@@ -21,7 +21,7 @@ export default function Admin() {
 
   const fetchEvents = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/events");
+      const res = await axios.get("https://yellowmatics-events.onrender.com/api/events");
       setEvents(res.data);
     } catch (error) {
       console.error("Error fetching events:", error);
@@ -36,7 +36,7 @@ export default function Admin() {
     try {
       if (editingEvent) {
         await axios.put(
-          `http://localhost:5000/api/events/${editingEvent._id}`,
+          `https://yellowmatics-events.onrender.com/api/events/${editingEvent._id}`,
           {
             name,
             date,
@@ -46,7 +46,7 @@ export default function Admin() {
         );
         alert("✅ Event updated successfully!");
       } else {
-        await axios.post("http://localhost:5000/api/events", {
+        await axios.post("https://yellowmatics-events.onrender.com/api/events", {
           name,
           date,
           description,
@@ -72,7 +72,7 @@ export default function Admin() {
     if (!window.confirm("Are you sure you want to delete this event?")) return;
 
     try {
-      await axios.delete(`http://localhost:5000/api/events/${eventId}`);
+      await axios.delete(`https://yellowmatics-events.onrender.com/api/events/${eventId}`);
       alert("❌ Event deleted successfully!");
       fetchEvents();
     } catch (error) {
@@ -102,7 +102,7 @@ export default function Admin() {
   const fetchRegistrations = async (eventId, eventName) => {
     try {
       const res = await axios.get(
-        `http://localhost:5000/api/events/${eventId}/registrations`
+        `https://yellowmatics-events.onrender.com/api/events/${eventId}/registrations`
       );
       setRegistrations(res.data);
       setSelectedEventName(eventName); // Store event name for UI

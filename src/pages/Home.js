@@ -7,7 +7,7 @@ export default function Home() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    axios.get("http://localhost:5000/api/events")
+    axios.get("https://yellowmatics-events.onrender.com/api/events")
       .then(res => setEvents(res.data))
       .catch(err => console.error("Error:", err));
   }, []);
