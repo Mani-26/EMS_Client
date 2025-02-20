@@ -18,6 +18,7 @@ export default function Admin() {
   useEffect(() => {
     fetchEvents();
   }, []);
+console.log(setRegisteredUsers);
 
   const fetchEvents = async () => {
     try {
