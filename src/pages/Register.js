@@ -13,7 +13,7 @@ export default function Register() {
     const fetchEventDetails = async () => {
       try {
         const res = await axios.get(
-          `${process.env.Host}/api/events/${eventId}`
+          `https://yellowmatics-events.onrender.com/api/events/${eventId}`
         );
         setAvailableSeats(res.data.seatLimit - res.data.registeredUsers);
       } catch (error) {
@@ -33,14 +33,14 @@ export default function Register() {
     try {
       // Fetch latest remaining seats
       const eventRes = await axios.get(
-        `${process.env.Host}/api/events/${eventId}`
+        `https://yellowmatics-events.onrender.com/api/events/${eventId}`
       );
       if (eventRes.data.remainingSeats <= 0) {
         alert("⚠️ Sorry, all seats are filled! \n Stay tuned for next event");
         return;
       }
 
-      const res = await axios.post(`${process.env.Host}/api/register`, {
+      const res = await axios.post("https://yellowmatics-events.onrender.com/api/register", {
         name,
         email,
         eventId,

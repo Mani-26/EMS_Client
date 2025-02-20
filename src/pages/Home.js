@@ -5,16 +5,15 @@ import { useNavigate } from "react-router-dom";
 export default function Home() {
   const [events, setEvents] = useState([]);
   const navigate = useNavigate();
-
   useEffect(() => {
-    axios.get(`${process.env.Host}/api/events`)
+    axios.get("https://yellowmatics-events.onrender.com/api/events")
       .then(res => setEvents(res.data))
       .catch(err => console.error("Error:", err));
   }, []);
 
   return (
     <div className="home-container">
-      <h1>🎉 Company Events</h1>
+      <h1>🎉 Yellowmatics Events</h1>
       <div className="events-list">
         {events.map(event => {
           const today = new Date();
