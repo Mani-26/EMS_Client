@@ -1,7 +1,10 @@
+import Swal from "sweetalert2";
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 export default function Admin() {
+  const navigate = useNavigate();
   const [name, setName] = useState("");
   const [date, setDate] = useState("");
   const [description, setDescription] = useState("");
@@ -16,10 +19,24 @@ export default function Admin() {
   const [selectedEventName, setSelectedEventName] = useState("");
 
   useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      Swal.fire({
+        icon: "error",
+        title: "Unauthorized!",
+        text: "Please log in to access this page.",
+        confirmButtonColor: "#007bff",
+      }).then(() => {
+        navigate("/admin-login"); // Redirect after clicking OK
+      });
+    }
+  }, []);
+
+  useEffect(() => {
     fetchEvents();
   }, []);
-console.log(setRegisteredUsers);
-
+  // console.log(setRegisteredUsers);
+  // setRegisteredUsers();
   const fetchEvents = async () => {
     try {
       const res = await axios.get("https://yellowmatics-events.onrender.com/api/events");
@@ -29,9 +46,43 @@ console.log(setRegisteredUsers);
     }
   };
 
+  const handleDownloadExcel = async (eventId, eventName) => {
+    try {
+      const response = await axios.get(
+        `https://yellowmatics-events.onrender.com/api/events/${eventId}/download`,
+        { responseType: "blob" } // Important for file download
+      );
+
+      // Create a URL for the blob
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+
+      // Create a download link and trigger click
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `${eventName}_Registrations.xlsx`);
+      document.body.appendChild(link);
+      link.click();
+
+      // Clean up
+      link.parentNode.removeChild(link);
+    } catch (error) {
+      console.error("Error downloading Excel file:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "Failed to download Excel.",
+      });
+    }
+  };
+
   const handleSaveEvent = async () => {
     if (!name || !date || !description || !seatLimit) {
-      alert("Please fill in all fields.");
+      Swal.fire({
+        icon: "warning",
+        title: "Oops...",
+        text: "Please fill in all fields!",
+      });
+      
       return;
     }
     try {
@@ -45,7 +96,14 @@ console.log(setRegisteredUsers);
             seatLimit,
           }
         );
-        alert("✅ Event updated successfully!");
+        Swal.fire({
+          icon: "success",
+          title: "Success!",
+          text: "Event updated successfully!",
+          showConfirmButton: false,
+          timer: 1500,
+        });
+        
       } else {
         await axios.post("https://yellowmatics-events.onrender.com/api/events", {
           name,
@@ -53,7 +111,14 @@ console.log(setRegisteredUsers);
           description,
           seatLimit,
         });
-        alert("✅ Event created successfully!");
+        Swal.fire({
+          icon: "success",
+          title: "Success!",
+          text: "Event created successfully!",
+          showConfirmButton: false,
+          timer: 1500,
+        });
+        
       }
 
       setName("");
@@ -65,21 +130,35 @@ console.log(setRegisteredUsers);
       fetchEvents();
     } catch (error) {
       console.error("Error saving event:", error);
-      alert("Failed to save event.");
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "Failed to save event.",
+      });
     }
   };
 
   const handleDeleteEvent = async (eventId) => {
-    if (!window.confirm("Are you sure you want to delete this event?")) return;
-
-    try {
-      await axios.delete(`https://yellowmatics-events.onrender.com/api/events/${eventId}`);
-      alert("❌ Event deleted successfully!");
-      fetchEvents();
-    } catch (error) {
-      console.error("Error deleting event:", error);
-      alert("Failed to delete event.");
-    }
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to undo this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, delete it!",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          await axios.delete(`https://yellowmatics-events.onrender.com/api/events/${eventId}`);
+          Swal.fire("Deleted!", "The event has been removed.", "success");
+          fetchEvents();
+        } catch (error) {
+          Swal.fire("Error", "Failed to delete event", "error");
+        }
+      }
+    });
+    
   };
 
   const handleEditEvent = (event) => {
@@ -109,7 +188,11 @@ console.log(setRegisteredUsers);
       setSelectedEventName(eventName); // Store event name for UI
       setShowRegistrations(true);
     } catch (error) {
-      alert(error.response?.data?.message || "Failed to fetch registrations.");
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: error.response?.data?.message || "Failed to fetch registrations.",
+      }); 
     }
   };
 
@@ -180,7 +263,7 @@ console.log(setRegisteredUsers);
               className="view-button"
               onClick={() => fetchRegistrations(event._id, event.name)}
             >
-              👀 View Registrations
+              👀 View
             </button>
 
             <button
@@ -194,6 +277,12 @@ console.log(setRegisteredUsers);
               onClick={() => handleDeleteEvent(event._id)}
             >
               ❌ Delete
+            </button>
+            <button
+              className="download-button"
+              onClick={() => handleDownloadExcel(event._id, event.name)}
+            >
+              📥 Download
             </button>
           </div>
         ))}

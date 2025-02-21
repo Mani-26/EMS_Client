@@ -50,6 +50,8 @@ h1 {
 .register-button, 
 .event-form button, 
 .edit-button, 
+.view-button,
+.download-button,
 .delete-button {
   padding: 10px 15px;
   border: none;
@@ -75,21 +77,91 @@ h1 {
 
 .edit-button {
   background-color: #ffc107;
-  color: #333;
+  color: white;  
+  margin: 5px;
 }
 
 .edit-button:hover {
   background-color: #e0a800;
 }
 
+.view-button {
+  background-color: #1bed4f;
+  color: white;
+  margin: 5px;
+}
+
+.view-button:hover {
+  background-color: #1fb444;
+}
+
+.download-button {
+  background-color: #3604fc;
+  color: white;
+  margin: 5px;
+}
+
+.download-button:hover {
+  background-color: #220985;
+}
+
 .delete-button {
   background-color: #dc3545;
+  margin: 5px;
   color: white;
 }
 
 .delete-button:hover {
   background-color: #c82333;
 }
+/* Navbar.css */
+.navbar {
+  background-color: #8ed816;
+  overflow: hidden;
+}
+
+.navbar-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 20px;
+}
+
+.navbar-logo {
+  color: #fff;
+  text-decoration: none;
+  font-size: 1.5em;
+}
+
+.navbar-menu {
+  display: flex;
+  font-size: 1.25em;
+}
+
+.navbar-item {
+  color: #fff;
+  text-decoration: none;
+  padding: 14px 20px;
+}
+
+.navbar-item:hover {
+  background-color: #ddd;
+  color: black;
+}
+
+/* Responsive */
+@media screen and (max-width: 600px) {
+  .navbar-menu {
+    flex-direction: column;
+    width: 100%;
+  }
+  .navbar-item {
+    text-align: center;
+    padding: 10px;
+    width: 100%;
+  }
+}
+
 
 /* ================================= */
 /* Home Page Styles */
@@ -131,6 +203,7 @@ h1 {
 /* ================================= */
 /* Admin Page Styles */
 /* ================================= */
+
 .admin-container {
   max-width: 800px;
   margin: 50px auto;

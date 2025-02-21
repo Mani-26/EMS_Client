@@ -24,7 +24,7 @@ export default function Home() {
             <div key={event._id} className="event-card">
               <h2>{event.name}</h2>
               <p className="event-date">📅 {event.date}</p>
-              <p>Seats: {event.registeredUsers} / {event.seatLimit}</p>
+              <p>Available Seats: {event.seatLimit-event.registeredUsers}</p>
 
               <button 
                 className="register-button"

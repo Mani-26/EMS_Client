@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { useParams } from "react-router-dom";
+import Swal from "sweetalert2";
 
 export default function Register() {
   const [name, setName] = useState(""); // New State for Name
@@ -26,35 +27,57 @@ export default function Register() {
   // Handle registration
   const handleRegister = async () => {
     if (!name || !email) {
-      alert("Please enter your name and email.");
+      Swal.fire({
+        icon: "warning",
+        title: "Missing Information!",
+        text: "Please enter your name and email before registering.",
+        confirmButtonColor: "#007bff",
+      });
       return;
     }
-
+  
     try {
       // Fetch latest remaining seats
       const eventRes = await axios.get(
         `https://yellowmatics-events.onrender.com/api/events/${eventId}`
       );
       if (eventRes.data.remainingSeats <= 0) {
-        alert("⚠️ Sorry, all seats are filled! \n Stay tuned for next event");
+        Swal.fire({
+          icon: "warning",
+          title: "⚠️ Sorry, all seats are filled!",
+          text: "Stay tuned for our next event!",
+          confirmButtonColor: "#007bff",
+        });
         return;
       }
-
+  
+      // Proceed with registration
       const res = await axios.post("https://yellowmatics-events.onrender.com/api/register", {
         name,
         email,
         eventId,
       });
-      alert(res.data.message);
-      setAvailableSeats((prevSeats) => prevSeats - 1);
+  
+      // Await confirmation before updating state
+      await Swal.fire({
+        icon: "success",
+        title: "🎉 Registration Successful!",
+        text: res.data.message,
+        confirmButtonColor: "#28a745",
+      });
+  
+      // Update seat count only after successful registration
+      setAvailableSeats((prevSeats) => Math.max(prevSeats - 1, 0));
     } catch (error) {
-      alert(
-        error.response?.data?.message ||
-          "❌ Registration failed. Try again later."
-      );
+      Swal.fire({
+        icon: "error",
+        title: "❌ Registration Failed",
+        text: error.response?.data?.message || "Try again later.",
+        confirmButtonColor: "#d33",
+      });
     }
   };
-
+  
   return (
     <div className="register-container">
       <h1>Register for Event</h1>
