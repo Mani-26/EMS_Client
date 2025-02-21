@@ -11,15 +11,14 @@ export default function AdminLogin() {
   const handleLogin = async () => {
     try {
       const res = await axios.post("https://yellowmatics-events.onrender.com/api/admin/login", { email, password });
-      localStorage.setItem("token", res.data.token);
-      Swal.fire({
+      sessionStorage.setItem("token", res.data.token);
+      await Swal.fire({
         icon: "success",
         title: "Login Successful!",
         text: "Redirecting...",
         showConfirmButton: false,
         timer: 1500,
       });
-      
       navigate("/admin");
     } catch (error) {
       Swal.fire({
