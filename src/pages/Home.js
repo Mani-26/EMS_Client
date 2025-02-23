@@ -1,42 +1,116 @@
-import { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import "./Home.css"; // Optional: Add custom styles
 
-export default function Home() {
+const Home = () => {
   const [events, setEvents] = useState([]);
+  const [isLoading, setIsLoading] = useState(true); // Added for loading effect
   const navigate = useNavigate();
+
   useEffect(() => {
-    axios.get("https://yellowmatics-events.onrender.com/api/events")
-      .then(res => setEvents(res.data))
-      .catch(err => console.error("Error:", err));
+    const fetchEvents = async () => {
+      try {
+        setIsLoading(true);
+        const response = await axios.get("https://yellowmatics-events.onrender.com/api/events");
+        const fetchedEvents = response.data;
+
+        // Sort events: Upcoming first, then expired
+        const sortedEvents = fetchedEvents.sort((a, b) => {
+          const today = new Date().setHours(0, 0, 0, 0);
+          const dateA = new Date(a.date).setHours(0, 0, 0, 0);
+          const dateB = new Date(b.date).setHours(0, 0, 0, 0);
+
+          if (dateA < today && dateB < today) return dateA - dateB; // Sort expired by date
+          if (dateA < today) return 1; // Expired to the end
+          if (dateB < today) return -1; // Upcoming first
+          return dateA - dateB; // Sort upcoming by date
+        });
+
+        setEvents(sortedEvents);
+      } catch (error) {
+        console.error("Error fetching events:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchEvents();
   }, []);
 
   return (
     <div className="home-container">
-      <h1>🎉 Yellowmatics Events</h1>
-      <div className="events-list">
-        {events.map(event => {
-          const today = new Date();
-          const eventDate = new Date(event.date);
-          const isPastEvent = eventDate < today;
+      <header className="home-header">
+        {/* <br/> */}
+        <h1>🎉 Welcome to Yellowmatics Events</h1>
+        <p>Discover and join our exciting upcoming events!</p>
+      </header>
 
-          return (
-            <div key={event._id} className="event-card">
-              <h2>{event.name}</h2>
-              <p className="event-date">📅 {event.date}</p>
-              <p>Available Seats: {event.seatLimit-event.registeredUsers}</p>
+      {isLoading ? (
+        <div className="loading-container">
+          <div className="spinner"></div>
+          <p>Loading events...</p>
+        </div>
+      ) : events.length === 0 ? (
+        <p className="no-events">No events available right now. Check back soon!</p>
+      ) : (
+        <section className="events-section">
+          <h2>📅 Event Lineup</h2>
+          <div className="events-list">
+            {events.map((event, index) => {
+              const eventDate = new Date(event.date);
+              const today = new Date().setHours(0, 0, 0, 0);
+              const isExpired = eventDate < today;
+              const availableSeats = event.seatLimit - event.registeredUsers;
 
-              <button 
-                className="register-button"
-                onClick={() => navigate(`/register/${event._id}`)}
-                disabled={isPastEvent || event.registeredUsers >= event.seatLimit}
-              >
-                {isPastEvent ? "Registration Closed" : event.registeredUsers >= event.seatLimit ? "Event Full" : "Register Now 🚀"}
-              </button>
-            </div>
-          );
-        })}
-      </div>
+              return (
+                <div
+                  key={event._id}
+                  className={`event-card ${isExpired ? "expired" : ""}`}
+                  style={{ animationDelay: `${index * 0.1}s` }} // Staggered animation
+                >
+                  <h3>{event.name}</h3>
+                  <p className="event-date">
+                    📅 {eventDate.toLocaleDateString("en-US", {
+                      weekday: "long",
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })}
+                  </p>
+                  <p className="event-desc">{event.description}</p>
+                  <p className="seat-info">
+                    💺 Seats: <span>{availableSeats}</span> / {event.seatLimit}
+                    {availableSeats <= 5 && availableSeats > 0 && !isExpired && (
+                      <span className="low-seats"> (Few left!)</span>
+                    )}
+                  </p>
+                  <div className="event-actions">
+                    {isExpired ? (
+                      <button className="register-button" disabled>
+                        ❌ Expired
+                      </button>
+                    ) : availableSeats > 0 ? (
+                      <button
+                        className="register-button"
+                        onClick={() => navigate(`/register/${event._id}`)}
+                      >
+                        Register Now 🚀
+                      </button>
+                    ) : (
+                      <button className="register-button" disabled>
+                        ⚠️ Full
+                      </button>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
     </div>
   );
-}
+};
+
+export default Home;

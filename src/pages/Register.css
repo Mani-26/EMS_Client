@@ -1,0 +1,92 @@
+.register-container {
+    animation: fadeIn 0.5s ease-in-out;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  
+  .register-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-top: 2rem;
+  }
+  
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .form-group label {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text-light);
+  }
+  
+  body.dark-mode .form-group label {
+    color: var(--text-dark);
+  }
+  
+  .seat-info {
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+  }
+  
+  .seat-info span {
+    font-weight: 600;
+    color: var(--primary-gold);
+  }
+  
+  .low-seats {
+    color: #dc3545;
+    font-style: italic;
+    margin-left: 0.5rem;
+  }
+  
+  .loading {
+    opacity: 0.7;
+  }
+  
+  .register-button {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .spinner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .spinner::after {
+    content: "";
+    width: 20px;
+    height: 20px;
+    border: 2px solid #fff;
+    border-top: 2px solid transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-left: 0.5rem;
+  }
+  
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  
+  .back-link {
+    margin-top: 2rem;
+    text-align: center;
+  }
+  
+  .back-link a {
+    color: var(--primary-gold);
+    text-decoration: none;
+    transition: all 0.3s ease;
+  }
+  
+  .back-link a:hover {
+    text-decoration: underline;
+  }

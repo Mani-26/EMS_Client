@@ -1,281 +1,467 @@
 /* ================================= */
 /* General Styles */
 /* ================================= */
+:root {
+  --primary-gold: #b08d57;
+  --primary-dark: #957744;
+  --text-light: #2b2b2b;
+  --text-dark: #f5f5f5;
+  --bg-light: #ffffff;
+  --bg-dark: #1a1a1a;
+  --bg-gradient-light: linear-gradient(135deg, #f5f6f5 0%, #e8e9e8 100%);
+  --bg-gradient-dark: linear-gradient(135deg, #2b2b2b 0%, #1a1a1a 100%);
+  --shadow-light: 0 8px 24px rgba(0, 0, 0, 0.08);
+  --shadow-dark: 0 8px 24px rgba(0, 0, 0, 0.3);
+  --input-bg-light: #fafafa;
+  --input-bg-dark: #2b2b2b;
+  --border-light: #e0e0e0;
+  --border-dark: #404040;
+}
+
 body {
-  font-family: "Arial", sans-serif;
-  background-color: #f8f9fa;
+  font-family: 'Lato', 'Arial', sans-serif;
   margin: 0;
   padding: 0;
+  line-height: 1.6;
+}
+
+body.light-mode {
+  background: var(--bg-gradient-light);
+  color: var(--text-light);
+}
+
+body.dark-mode {
+  background: var(--bg-gradient-dark);
+  color: var(--text-dark);
 }
 
 h1 {
-  font-size: 28px;
-  margin-bottom: 20px;
-  color: #333;
+  font-family: 'Playfair Display', serif;
+  font-size: 2.5rem;
+  margin-bottom: 2rem;
   text-align: center;
+  letter-spacing: 0.5px;
+}
+
+body.light-mode h1 {
+  color: #1a1a1a;
+}
+
+body.dark-mode h1 {
+  color: var(--text-dark);
 }
 
 /* ================================= */
 /* Register Page Styles */
 /* ================================= */
 .register-container {
-  max-width: 400px;
-  margin: 50px auto;
-  padding: 20px;
-  border-radius: 10px;
-  background: #f9f9f9;
-  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+  max-width: 450px;
+  margin: 5rem auto;
+  padding: 2.5rem;
+  border-radius: 15px;
   text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+body.light-mode .register-container {
+  background: var(--bg-light);
+  box-shadow: var(--shadow-light);
+}
+
+body.dark-mode .register-container {
+  background: var(--bg-dark);
+  box-shadow: var(--shadow-dark);
 }
 
 .seat-info {
-  font-size: 16px;
-  margin-bottom: 10px;
-  color: #007bff;
-  font-weight: bold;
+  font-size: 1rem;
+  margin-bottom: 1rem;
+  color: var(--primary-gold);
+  font-weight: 600;
+  letter-spacing: 0.5px;
 }
 
 .input-field {
   width: 100%;
-  padding: 10px;
-  margin: 10px 0;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  font-size: 16px;
+  padding: 0.875rem;
+  margin: 0.75rem 0;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+body.light-mode .input-field {
+  background: var(--input-bg-light);
+  border: 1px solid var(--border-light);
+}
+
+body.dark-mode .input-field {
+  background: var(--input-bg-dark);
+  border: 1px solid var(--border-dark);
+  color: var(--text-dark);
+}
+
+.input-field:focus {
+  outline: none;
+  border-color: var(--primary-gold);
+  box-shadow: 0 0 5px rgba(176, 141, 87, 0.2);
 }
 
 /* ================================= */
 /* Button Styles (Global) */
 /* ================================= */
-.register-button, 
-.event-form button, 
-.edit-button, 
+.register-button,
+.event-form button,
+.edit-button,
 .view-button,
 .download-button,
 .delete-button {
-  padding: 10px 15px;
+  padding: 0.75rem 1.5rem;
   border: none;
-  font-size: 16px;
+  font-size: 1rem;
   cursor: pointer;
-  border-radius: 5px;
-  transition: 0.3s;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  color: #fff;
 }
 
 .register-button {
-  background-color: #28a745;
-  color: white;
+  background: linear-gradient(135deg, #28a745 0%, #218838 100%);
 }
 
 .register-button:hover {
-  background-color: #218838;
+  background: linear-gradient(135deg, #218838 0%, #1d7732 100%);
+  transform: translateY(-2px);
 }
 
 .register-button:disabled {
-  background-color: #ccc;
+  background: #d0d0d0;
   cursor: not-allowed;
+  transform: none;
 }
 
 .edit-button {
-  background-color: #ffc107;
-  color: white;  
-  margin: 5px;
+  background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+  margin: 0.5rem;
 }
 
 .edit-button:hover {
-  background-color: #e0a800;
+  background: linear-gradient(135deg, #e0a800 0%, #cc9400 100%);
+  transform: translateY(-2px);
 }
 
 .view-button {
-  background-color: #1bed4f;
-  color: white;
-  margin: 5px;
+  background: linear-gradient(135deg, #1bed4f 0%, #1fb444 100%);
+  margin: 0.5rem;
 }
 
 .view-button:hover {
-  background-color: #1fb444;
+  background: linear-gradient(135deg, #1fb444 0%, #1a9b3a 100%);
+  transform: translateY(-2px);
 }
 
 .download-button {
-  background-color: #3604fc;
-  color: white;
-  margin: 5px;
+  background: linear-gradient(135deg, #3604fc 0%, #220985 100%);
+  margin: 0.5rem;
 }
 
 .download-button:hover {
-  background-color: #220985;
+  background: linear-gradient(135deg, #220985 0%, #1a076b 100%);
+  transform: translateY(-2px);
 }
 
 .delete-button {
-  background-color: #dc3545;
-  margin: 5px;
-  color: white;
+  background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+  margin: 0.5rem;
 }
 
 .delete-button:hover {
-  background-color: #c82333;
+  background: linear-gradient(135deg, #c82333 0%, #b31e2c 100%);
+  transform: translateY(-2px);
 }
+
 /* Navbar.css */
 .navbar {
-  background-color: #8ed816;
   overflow: hidden;
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+  z-index: 500; /* Adjusted to be below modal */
+}
+
+body.light-mode .navbar {
+  background: linear-gradient(90deg, #f5f6f5 0%, #e8e9e8 100%);
+}
+
+body.dark-mode .navbar {
+  background: linear-gradient(90deg, #1a1a1a 0%, #2b2b2b 100%);
 }
 
 .navbar-container {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 14px 20px;
+  padding: 1rem 2rem;
+  max-width: 1200px;
+  margin: 0;
 }
 
 .navbar-logo {
-  color: #fff;
   text-decoration: none;
-  font-size: 1.5em;
+  font-size: 1.5rem;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 600;
+}
+
+body.light-mode .navbar-logo {
+  color: var(--primary-gold);
+}
+
+body.dark-mode .navbar-logo {
+  color: var(--text-dark);
 }
 
 .navbar-menu {
   display: flex;
-  font-size: 1.25em;
+  font-size: 1.125rem;
 }
 
 .navbar-item {
-  color: #fff;
   text-decoration: none;
-  padding: 14px 20px;
+  padding: 1rem 1.5rem;
+  transition: all 0.3s ease;
 }
 
-.navbar-item:hover,.navbar-logo:hover {
-  /* background-color: #ddd; */
-  color: black;
+body.light-mode .navbar-item {
+  color: var(--text-light);
+}
+
+body.dark-mode .navbar-item {
+  color: var(--text-dark);
+}
+
+.navbar-item:hover,
+.navbar-logo:hover {
+  color: var(--primary-gold);
 }
 
 /* Responsive */
 @media screen and (max-width: 600px) {
+  .navbar-container {
+    padding: 1rem;
+  }
   .navbar-menu {
     flex-direction: column;
     width: 100%;
   }
   .navbar-item {
     text-align: center;
-    padding: 10px;
+    padding: 0.75rem;
     width: 100%;
   }
 }
-
 
 /* ================================= */
 /* Home Page Styles */
 /* ================================= */
 .home-container {
-  max-width: 800px;
-  margin: 50px auto;
+  max-width: 1200px;
+  margin: 5rem auto;
   text-align: center;
+  padding: 0 2rem;
+  position: relative;
+  z-index: 1; /* Lower than modal */
 }
 
 .events-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
   justify-content: center;
 }
 
-/* Event Card */
 .event-card {
-  background: white;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-  width: 300px;
+  padding: 2rem;
+  border-radius: 15px;
   text-align: center;
-  transition: transform 0.3s ease-in-out;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+body.light-mode .event-card {
+  background: var(--bg-light);
+  box-shadow: var(--shadow-light);
+}
+
+body.dark-mode .event-card {
+  background: var(--bg-dark);
+  box-shadow: var(--shadow-dark);
 }
 
 .event-card:hover {
-  transform: scale(1.05);
+  transform: translateY(-5px);
+}
+
+body.light-mode .event-card:hover {
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+}
+
+body.dark-mode .event-card:hover {
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
 }
 
 .event-date {
-  font-size: 14px;
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+  letter-spacing: 0.5px;
+}
+
+body.light-mode .event-date {
   color: #666;
-  margin-bottom: 10px;
+}
+
+body.dark-mode .event-date {
+  color: #999;
 }
 
 /* ================================= */
 /* Admin Page Styles */
 /* ================================= */
-
 .admin-container {
-  max-width: 800px;
-  margin: 50px auto;
+  max-width: 1200px;
+  margin: 5rem auto;
   text-align: center;
+  padding: 0 2rem;
+  position: relative;
+  z-index: 1; /* Lower than modal */
 }
 
-/* Admin Form */
 .event-form {
-  background: #f9f9f9;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-  margin-bottom: 30px;
+  padding: 2.5rem;
+  border-radius: 15px;
+  margin-bottom: 3rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+  z-index: 5; /* Below modal but above content */
 }
 
-.event-form input, 
+body.light-mode .event-form {
+  background: var(--bg-light);
+  box-shadow: var(--shadow-light);
+}
+
+body.dark-mode .event-form {
+  background: var(--bg-dark);
+  box-shadow: var(--shadow-dark);
+}
+
+.event-form input,
 .event-form textarea {
   width: 100%;
-  padding: 10px;
-  margin: 10px 0;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  font-size: 16px;
+  padding: 0.875rem;
+  margin: 0.75rem 0;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
 }
 
-/* Events List (Admin) */
+body.light-mode .event-form input,
+body.light-mode .event-form textarea {
+  background: var(--input-bg-light);
+  border: 1px solid var(--border-light);
+}
+
+body.dark-mode .event-form input,
+body.dark-mode .event-form textarea {
+  background: var(--input-bg-dark);
+  border: 1px solid var(--border-dark);
+  color: var(--text-dark);
+}
+
+.event-form input:focus,
+.event-form textarea:focus {
+  outline: none;
+  border-color: var(--primary-gold);
+  box-shadow: 0 0 5px rgba(176, 141, 87, 0.2);
+}
+
 .event-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
   justify-content: center;
 }
 
 /* Floating "+" Button */
 .floating-button {
   position: fixed;
-  bottom: 20px;
-  right: 20px;
-  width: 60px;
-  height: 60px;
-  background-color: #007bff;
-  color: white;
+  bottom: 2rem;
+  right: 2rem;
+  width: 4rem;
+  height: 4rem;
+  background: linear-gradient(135deg, var(--primary-gold) 0%, var(--primary-dark) 100%);
+  color: #fff;
   border: none;
   border-radius: 50%;
-  font-size: 24px;
+  font-size: 1.5rem;
   font-weight: bold;
   cursor: pointer;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
-  transition: background-color 0.3s ease;
+  transition: all 0.3s ease;
+  z-index: 10; /* Above content but below modal */
+}
+
+body.light-mode .floating-button {
+  box-shadow: var(--shadow-light);
+}
+
+body.dark-mode .floating-button {
+  box-shadow: var(--shadow-dark);
 }
 
 .floating-button:hover {
-  background-color: #0056b3;
+  transform: translateY(-3px);
 }
 
+body.light-mode .floating-button:hover {
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
+}
+
+body.dark-mode .floating-button:hover {
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+}
+
+/* Modal Styles */
 .modal {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.7);
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 1000; /* High z-index to appear on top */
+  animation: fadeIn 0.3s ease-in-out; /* Kept from Admin.css */
 }
 
 .modal-content {
-  background: white;
-  padding: 20px;
-  border-radius: 5px;
+  padding: 2rem;
+  border-radius: 15px;
   text-align: center;
+  max-width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+body.light-mode .modal-content {
+  background: var(--bg-light);
+  box-shadow: var(--shadow-light);
+}
+
+body.dark-mode .modal-content {
+  background: var(--bg-dark);
+  box-shadow: var(--shadow-dark);
 }
 
 .modal-content ul {
@@ -284,45 +470,79 @@ h1 {
 }
 
 .modal-content button {
-  margin-top: 10px;
-  padding: 8px 15px;
+  margin-top: 1rem;
+  padding: 0.75rem 1.5rem;
   border: none;
-  background: red;
-  color: white;
+  background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+  color: #fff;
   cursor: pointer;
-  border-radius: 5px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
 }
 
+.modal-content button:hover {
+  background: linear-gradient(135deg, #c82333 0%, #b31e2c 100%);
+}
+
+/* Login Container */
 .login-container {
-  max-width: 400px;
-  margin: 50px auto;
-  padding: 20px;
-  background: white;
-  border-radius: 10px;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  max-width: 450px;
+  margin: 5rem auto;
+  padding: 2.5rem;
+  border-radius: 15px;
   text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+body.light-mode .login-container {
+  background: var(--bg-light);
+  box-shadow: var(--shadow-light);
+}
+
+body.dark-mode .login-container {
+  background: var(--bg-dark);
+  box-shadow: var(--shadow-dark);
 }
 
 .login-container input {
   width: 100%;
-  padding: 10px;
-  margin: 10px 0;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  font-size: 16px;
+  padding: 0.875rem;
+  margin: 0.75rem 0;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+body.light-mode .login-container input {
+  background: var(--input-bg-light);
+  border: 1px solid var(--border-light);
+}
+
+body.dark-mode .login-container input {
+  background: var(--input-bg-dark);
+  border: 1px solid var(--border-dark);
+  color: var(--text-dark);
+}
+
+.login-container input:focus {
+  outline: none;
+  border-color: var(--primary-gold);
+  box-shadow: 0 0 5px rgba(176, 141, 87, 0.2);
 }
 
 .login-container button {
   width: 100%;
-  padding: 10px;
-  background: #007bff;
-  color: white;
+  padding: 0.875rem;
+  background: linear-gradient(135deg, var(--primary-gold) 0%, var(--primary-dark) 100%);
+  color: #fff;
   border: none;
-  font-size: 18px;
-  border-radius: 5px;
+  font-size: 1.125rem;
+  border-radius: 8px;
   cursor: pointer;
+  transition: all 0.3s ease;
 }
 
 .login-container button:hover {
-  background: #0056b3;
+  background: linear-gradient(135deg, var(--primary-dark) 0%, #806638 100%);
+  transform: translateY(-2px);
 }
