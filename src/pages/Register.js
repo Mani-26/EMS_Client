@@ -17,7 +17,7 @@ export default function Register() {
     const fetchEventDetails = async () => {
       try {
         const res = await axios.get(
-          `https://yellowmatics-events.onrender.com/api/events/${eventId}`
+          `https://emsserver2-production.up.railway.app/api/events/${eventId}`
         );
         setEventName(res.data.name);
         setAvailableSeats(res.data.seatLimit - res.data.registeredUsers);
@@ -58,7 +58,7 @@ export default function Register() {
     try {
       // Fetch latest event data to check seats
       const eventRes = await axios.get(
-        `https://yellowmatics-events.onrender.com/api/events/${eventId}`
+        `https://emsserver2-production.up.railway.app/api/events/${eventId}`
       );
       const remainingSeats = eventRes.data.seatLimit - eventRes.data.registeredUsers;
 
@@ -75,7 +75,7 @@ export default function Register() {
       }
 
       // Register user
-      const res = await axios.post("https://yellowmatics-events.onrender.com/api/register", {
+      const res = await axios.post("https://emsserver2-production.up.railway.app/api/register", {
         name,
         email,
         eventId,

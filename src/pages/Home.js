@@ -12,7 +12,7 @@ const Home = () => {
     const fetchEvents = async () => {
       try {
         setIsLoading(true);
-        const response = await axios.get("https://yellowmatics-events.onrender.com/api/events");
+        const response = await axios.get("https://emsserver2-production.up.railway.app/api/events");
         const fetchedEvents = response.data;
 
         // Sort events: Upcoming first, then expired

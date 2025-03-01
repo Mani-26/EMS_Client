@@ -37,7 +37,7 @@ export default function Admin() {
 
   const fetchEvents = async () => {
     try {
-      const res = await axios.get("https://yellowmatics-events.onrender.com/api/events");
+      const res = await axios.get("https://emsserver2-production.up.railway.app/api/events");
       setEvents(res.data);
     } catch (error) {
       Swal.fire({
@@ -51,7 +51,7 @@ export default function Admin() {
   const handleDownloadExcel = async (eventId, eventName) => {
     try {
       const response = await axios.get(
-        `https://yellowmatics-events.onrender.com/api/events/${eventId}/download`,
+        `https://emsserver2-production.up.railway.app/api/events/${eventId}/download`,
         { responseType: "blob" }
       );
       const url = window.URL.createObjectURL(new Blob([response.data]));
@@ -97,7 +97,7 @@ export default function Admin() {
     try {
       if (editingEvent) {
         await axios.put(
-          `https://yellowmatics-events.onrender.com/api/events/${editingEvent._id}`,
+          `https://emsserver2-production.up.railway.app/api/events/${editingEvent._id}`,
           formData
         );
         Swal.fire({
@@ -108,7 +108,7 @@ export default function Admin() {
           showConfirmButton: false,
         });
       } else {
-        await axios.post("https://yellowmatics-events.onrender.com/api/events", formData);
+        await axios.post("https://emsserver2-production.up.railway.app/api/events", formData);
         Swal.fire({
           icon: "success",
           title: "Created!",
@@ -142,7 +142,7 @@ export default function Admin() {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          await axios.delete(`https://yellowmatics-events.onrender.com/api/events/${eventId}`);
+          await axios.delete(`https://emsserver2-production.up.railway.app/api/events/${eventId}`);
           Swal.fire({
             icon: "success",
             title: "Deleted!",
@@ -176,7 +176,7 @@ export default function Admin() {
   const fetchRegistrations = async (eventId, eventName) => {
     try {
       const res = await axios.get(
-        `https://yellowmatics-events.onrender.com/api/events/${eventId}/registrations`
+        `https://emsserver2-production.up.railway.app/api/events/${eventId}/registrations`
       );
       setRegistrations(res.data);
       setSelectedEventName(eventName);
