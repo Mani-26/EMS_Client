@@ -10,8 +10,17 @@ export default function AdminLogin() {
 
   const handleLogin = async () => {
     try {
-      const res = await axios.post("https://emsserver2-production.up.railway.app/api/admin/login", { email, password });
-      sessionStorage.setItem("token", res.data.token);
+      console.log("Attempting login with:", { email });
+      const res = await axios.post(`${process.env.REACT_APP_API_URL}/api/admin/login`, { email, password });
+      console.log("Login response:", res.data);
+      
+      // Store token in both sessionStorage and localStorage for consistency
+      const token = res.data.token;
+      sessionStorage.setItem("token", token);
+      localStorage.setItem("token", token);
+      
+      console.log("Token stored, redirecting to admin page");
+      
       await Swal.fire({
         icon: "success",
         title: "Login Successful!",
@@ -19,14 +28,18 @@ export default function AdminLogin() {
         showConfirmButton: false,
         timer: 1500,
       });
-      navigate("/admin");
+      
+      // Force navigation with a slight delay to ensure the token is stored
+      setTimeout(() => {
+        navigate("/admin", { replace: true });
+      }, 100);
     } catch (error) {
+      console.error("Login error:", error);
       Swal.fire({
         icon: "error",
         title: "Login Failed",
-        text: "Invalid credentials. Try again.",
+        text: error.response?.data?.message || "Invalid credentials. Try again.",
       });
-      
     }
   };
 

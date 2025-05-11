@@ -1,0 +1,142 @@
+/* SweetAlert2 Dark Mode Customization */
+
+body.dark-mode .swal2-popup {
+  background-color: #2b2b2b !important;
+  color: #f5f5f5 !important;
+}
+
+body.dark-mode .swal2-title {
+  color: #f5f5f5 !important;
+}
+
+body.dark-mode .swal2-html-container {
+  color: #e0e0e0 !important;
+}
+
+body.dark-mode .swal2-input,
+body.dark-mode .swal2-textarea,
+body.dark-mode .swal2-select {
+  background-color: #333 !important;
+  color: #f5f5f5 !important;
+  border-color: #444 !important;
+}
+
+body.dark-mode .swal2-validation-message {
+  background-color: #333 !important;
+  color: #f5f5f5 !important;
+}
+
+/* For the payment verification form inside SweetAlert */
+body.dark-mode .payment-verification-form {
+  color: #f5f5f5 !important;
+}
+
+body.dark-mode #screenshot-error {
+  color: #ff6b6b !important;
+}
+
+body.dark-mode .swal2-styled.swal2-confirm {
+  background-color: #28a745 !important;
+}
+
+body.dark-mode .swal2-styled.swal2-cancel {
+  background-color: #dc3545 !important;
+}
+
+/* For the UPI payment modal */
+body.dark-mode .upi-payment-modal p {
+  color: #e0e0e0 !important;
+}
+
+body.dark-mode .upi-payment-modal .upi-instructions {
+  color: #aaa !important;
+}
+
+/* Fix for any white text on white background in modals */
+body.dark-mode .swal2-content * {
+  color: #e0e0e0;
+}
+
+/* Override any inline styles in SweetAlert modals */
+body.dark-mode .swal2-html-container [style*="color: #666"],
+body.dark-mode .swal2-html-container [style*="color:#666"] {
+  color: #aaa !important;
+}
+
+body.dark-mode .swal2-content input,
+body.dark-mode .swal2-content textarea,
+body.dark-mode .swal2-content select {
+  color: #f5f5f5 !important;
+  background-color: #333 !important;
+}
+
+/* Fix for specific elements in SweetAlert modals */
+body.dark-mode .swal2-popup small,
+body.dark-mode .swal2-popup .payment-method-description,
+body.dark-mode .swal2-popup [style*="color: #666"] {
+  color: #aaa !important;
+}
+
+/* Fix for footer text */
+body.dark-mode .swal2-footer p[style*="color: #666"],
+body.dark-mode .swal2-footer .transaction-ref {
+  color: #aaa !important;
+}
+
+.transaction-ref {
+  font-size: 0.8rem;
+  color: #666;
+}
+
+body.dark-mode .transaction-ref {
+  color: #aaa;
+}
+
+/* Fix for UPI ID container in dark mode */
+body.dark-mode .swal2-popup .upi-id-container {
+  background-color: #2b2b2b !important;
+  border: 1px solid #444 !important;
+}
+
+body.dark-mode .swal2-popup .upi-id-value {
+  color: #f5f5f5 !important;
+}
+
+/* Fix for UPI tabs in dark mode */
+body.dark-mode .swal2-popup .upi-tabs {
+  border-bottom: 1px solid #444 !important;
+}
+
+body.dark-mode .swal2-popup .upi-tab-btn {
+  color: #aaa !important;
+}
+
+body.dark-mode .swal2-popup .upi-tab-btn.active {
+  color: #4F46E5 !important;
+}
+
+/* Fix for UPI reference in dark mode */
+body.dark-mode .swal2-popup .upi-ref {
+  background-color: #2b2b2b !important;
+  color: #f5f5f5 !important;
+  border: 1px solid #444 !important;
+}
+
+/* Fix for any inline styles in SweetAlert modals */
+body.dark-mode .swal2-popup div[style*="background-color: #f8f9fa"],
+body.dark-mode .swal2-popup div[style*="background-color:#f8f9fa"] {
+  background-color: #2b2b2b !important;
+  border: 1px solid #444 !important;
+  color: #f5f5f5 !important;
+}
+
+/* Fix for any inline styles in SweetAlert modals */
+body.dark-mode .swal2-popup div[style*="color: #17a2b8"],
+body.dark-mode .swal2-popup h4[style*="color: #17a2b8"] {
+  color: #3bc9db !important;
+}
+
+/* Fix for any inline styles in SweetAlert modals */
+body.dark-mode .swal2-popup div[style*="border-left: 4px solid #17a2b8"] {
+  border-left: 4px solid #3bc9db !important;
+}

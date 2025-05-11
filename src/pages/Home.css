@@ -85,18 +85,34 @@
     color: #ccc;
   }
   
+  .event-venue {
+    font-weight: 500;
+    margin: 0.5rem 0;
+    color: #555;
+  }
+
+  body.dark-mode .event-venue {
+    color: #ccc;
+  }
+
   .seat-info {
     font-weight: 500;
   }
-  
+
   .seat-info span {
     color: var(--primary-gold);
   }
-  
+
   .low-seats {
     color: #dc3545;
     font-style: italic;
     margin-left: 0.5rem;
+  }
+
+  .event-fee {
+    font-weight: bold;
+    color: #28a745;
+    margin: 0.5rem 0;
   }
   
   .event-actions {

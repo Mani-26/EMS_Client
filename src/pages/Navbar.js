@@ -43,7 +43,7 @@ const Navbar = () => {
           <Link to="/" className="navbar-item" onClick={() => setIsOpen(false)}>
             Home
           </Link>
-          <Link to="/" className="navbar-item" onClick={() => setIsOpen(false)}>
+          {/* <Link to="/" className="navbar-item" onClick={() => setIsOpen(false)}>
             About
           </Link>
           <Link to="/" className="navbar-item" onClick={() => setIsOpen(false)}>
@@ -51,6 +51,9 @@ const Navbar = () => {
           </Link>
           <Link to="/" className="navbar-item" onClick={() => setIsOpen(false)}>
             Contact
+          </Link> */}
+          <Link to="/check-status" className="navbar-item" onClick={() => setIsOpen(false)}>
+            Check Status
           </Link>
           <Link to="/admin-login" className="navbar-item" onClick={() => setIsOpen(false)}>
             Admin Login

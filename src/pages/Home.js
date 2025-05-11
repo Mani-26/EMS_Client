@@ -12,7 +12,7 @@ const Home = () => {
     const fetchEvents = async () => {
       try {
         setIsLoading(true);
-        const response = await axios.get("https://emsserver2-production.up.railway.app/api/events");
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/events`);
         const fetchedEvents = response.data;
 
         // Sort events: Upcoming first, then expired
@@ -79,27 +79,34 @@ const Home = () => {
                     })}
                   </p>
                   <p className="event-desc">{event.description}</p>
+                  <p className="event-venue">📍 Venue: {event.venue}</p>
                   <p className="seat-info">
                     💺 Seats: <span>{availableSeats}</span> / {event.seatLimit}
                     {availableSeats <= 5 && availableSeats > 0 && !isExpired && (
                       <span className="low-seats"> (Few left!)</span>
                     )}
                   </p>
+                  {event.isFree === false && (
+                    <p className="event-fee">💰 Fee: ₹{event.fee}</p>
+                  )}
                   <div className="event-actions">
                     {isExpired ? (
                       <button className="register-button" disabled>
-                        ❌ Expired
+                        ❌ Registration Closed
                       </button>
                     ) : availableSeats > 0 ? (
                       <button
                         className="register-button"
                         onClick={() => navigate(`/register/${event._id}`)}
                       >
-                        Register Now 🚀
+                        {event.isFree === false ? 
+                          `Register (₹${event.fee}) 💰` : 
+                          "Register Now (Free) 🚀"
+                        }
                       </button>
                     ) : (
                       <button className="register-button" disabled>
-                        ⚠️ Full
+                        ⚠️ Registration Full
                       </button>
                     )}
                   </div>
