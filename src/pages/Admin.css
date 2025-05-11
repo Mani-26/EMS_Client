@@ -379,20 +379,42 @@ body.dark-mode .download-button {
   background: linear-gradient(135deg, #007bff 0%, #0069d9 100%);
   color: white !important;
   text-decoration: none;
-  padding: 10px 20px;
+  padding: 12px 20px;
   border-radius: 5px;
   font-weight: 600;
   margin: 10px auto;
   transition: all 0.3s ease;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  text-align: center;
 }
 
-.download-link:hover {
+.download-link:hover, .download-link:active {
   background: linear-gradient(135deg, #0069d9 0%, #0056b3 100%);
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  color: white !important;
+  text-decoration: none;
 }
 
 body.dark-mode .download-link {
   background: linear-gradient(135deg, #0069d9 0%, #004ba0 100%);
+}
+
+/* Copy link button style */
+.download-link.copy-link {
+  background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+}
+
+.download-link.copy-link:hover, .download-link.copy-link:active {
+  background: linear-gradient(135deg, #5a6268 0%, #495057 100%);
+}
+
+/* Button styling for download link */
+button.download-link {
+  cursor: pointer;
+  font-family: inherit;
+  font-size: inherit;
+  outline: none;
+  border: none;
+  width: 100%;
 }

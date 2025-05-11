@@ -96,61 +96,113 @@ export default function Admin() {
       const downloadUrl = `${process.env.REACT_APP_API_URL}/api/events/${eventId}/download?filename=${encodeURIComponent(cleanFileName)}`;
       
       // Different handling based on device type
-      if (isMobileDevice || window.innerWidth < 1024) { // Mobile or tablet devices (or small screens)
-        // For mobile devices, show a dialog with a link to open in browser
+      if (isInAppBrowser) { // If in mobile app (APK)
+        // For mobile apps, show a dialog with both options
         Swal.fire({
           icon: "info",
           title: "Download Ready",
           html: `
             <p>Your Excel file is ready to download.</p>
-            <p style="margin: 15px 0;">
-              <a href="${downloadUrl}" target="_blank" class="download-link">
-                Click here to open in browser
+            <div style="display: flex; flex-direction: column; gap: 12px; margin: 15px 0;">
+              <button id="copyLinkBtn" class="download-link" style="width: 100%; cursor: pointer; border: none; background: #28a745; color: white; font-weight: bold;">
+                Copy Download Link
+              </button>
+              <a href="${downloadUrl}" target="_blank" class="download-link" style="background: #6c757d; text-align: center;">
+                Try Open in Browser
               </a>
-            </p>
+            </div>
             <p style="font-size: 0.9rem; color: #666; margin-top: 10px;">
-              Opening in your browser gives you more options to download or share the file.
+              <strong>Recommended:</strong> Copy the link and paste it in your mobile browser.
             </p>
           `,
-          confirmButtonText: "Done",
-          confirmButtonColor: "#28a745",
-          showCancelButton: true,
-          cancelButtonText: "Copy Link",
-          cancelButtonColor: "#6c757d",
-        }).then((result) => {
-          if (result.dismiss === Swal.DismissReason.cancel) {
-            // Copy the link to clipboard
-            navigator.clipboard.writeText(downloadUrl).then(() => {
-              Swal.fire({
-                icon: "success",
-                title: "Link Copied!",
-                text: "Download link copied to clipboard",
-                timer: 1500,
-                showConfirmButton: false
+          confirmButtonText: "Close",
+          confirmButtonColor: "#6c757d",
+          didOpen: () => {
+            // Add click event to the copy button
+            document.getElementById('copyLinkBtn').addEventListener('click', () => {
+              navigator.clipboard.writeText(downloadUrl).then(() => {
+                // Show mini toast inside the modal
+                const toast = document.createElement('div');
+                toast.innerHTML = '✓ Link copied!';
+                toast.style.cssText = 'position: absolute; top: 10px; right: 10px; background: #28a745; color: white; padding: 8px 12px; border-radius: 4px; font-size: 14px; opacity: 0; transition: opacity 0.3s;';
+                document.querySelector('.swal2-popup').appendChild(toast);
+                
+                // Show and hide the toast
+                setTimeout(() => { toast.style.opacity = '1'; }, 10);
+                setTimeout(() => { 
+                  toast.style.opacity = '0'; 
+                  setTimeout(() => toast.remove(), 300);
+                }, 2000);
+              }).catch(err => {
+                console.error('Failed to copy link: ', err);
+                // Fallback for clipboard API failure
+                Swal.fire({
+                  icon: "info",
+                  title: "Manual Copy Required",
+                  html: `
+                    <p>Please copy this link manually:</p>
+                    <textarea readonly style="width: 100%; padding: 10px; margin: 10px 0; border-radius: 4px; border: 1px solid #ddd;">${downloadUrl}</textarea>
+                  `,
+                  confirmButtonColor: "#28a745",
+                });
               });
-            }).catch(err => {
-              console.error('Failed to copy link: ', err);
             });
           }
         });
-      } else if (isInAppBrowser) {
-        // For mobile apps, use a direct window.open approach
-        window.location.href = downloadUrl;
-        
-        // Show a different success message for mobile apps
-        setTimeout(() => {
-          Swal.fire({
-            icon: "success",
-            title: "Download Started",
-            html: `
-              <p>Your file should be downloading now.</p>
-              <p style="font-size: 0.9rem; margin-top: 10px;">
-                <strong>Note:</strong> Check your device's download folder or notifications for the file.
-              </p>
-            `,
-            confirmButtonColor: "#28a745",
-          });
-        }, 2000);
+      } else if (isMobileDevice || window.innerWidth < 1024) { // Mobile or tablet devices (or small screens) in browser
+        // For mobile browsers, show a dialog with both options
+        Swal.fire({
+          icon: "info",
+          title: "Download Ready",
+          html: `
+            <p>Your Excel file is ready to download.</p>
+            <div style="display: flex; flex-direction: column; gap: 12px; margin: 15px 0;">
+              <a href="${downloadUrl}" target="_blank" class="download-link" style="background: #28a745; text-align: center;">
+                Open in Browser
+              </a>
+              <button id="copyLinkBtn" class="download-link" style="width: 100%; cursor: pointer; border: none; background: #6c757d; color: white; font-weight: bold;">
+                Copy Download Link
+              </button>
+            </div>
+            <p style="font-size: 0.9rem; color: #666; margin-top: 10px;">
+              Choose how you want to download your file.
+            </p>
+          `,
+          confirmButtonText: "Close",
+          confirmButtonColor: "#28a745",
+          showCloseButton: true,
+          didOpen: () => {
+            // Add click event to the copy button
+            document.getElementById('copyLinkBtn').addEventListener('click', () => {
+              navigator.clipboard.writeText(downloadUrl).then(() => {
+                // Show mini toast inside the modal
+                const toast = document.createElement('div');
+                toast.innerHTML = '✓ Link copied!';
+                toast.style.cssText = 'position: absolute; top: 10px; right: 10px; background: #28a745; color: white; padding: 8px 12px; border-radius: 4px; font-size: 14px; opacity: 0; transition: opacity 0.3s;';
+                document.querySelector('.swal2-popup').appendChild(toast);
+                
+                // Show and hide the toast
+                setTimeout(() => { toast.style.opacity = '1'; }, 10);
+                setTimeout(() => { 
+                  toast.style.opacity = '0'; 
+                  setTimeout(() => toast.remove(), 300);
+                }, 2000);
+              }).catch(err => {
+                console.error('Failed to copy link: ', err);
+                // Fallback for clipboard API failure
+                Swal.fire({
+                  icon: "info",
+                  title: "Manual Copy Required",
+                  html: `
+                    <p>Please copy this link manually:</p>
+                    <textarea readonly style="width: 100%; padding: 10px; margin: 10px 0; border-radius: 4px; border: 1px solid #ddd;">${downloadUrl}</textarea>
+                  `,
+                  confirmButtonColor: "#28a745",
+                });
+              });
+            });
+          }
+        });
       } else {
         // For desktop browsers, use the original approach
         const response = await axios.get(
