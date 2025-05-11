@@ -116,7 +116,7 @@ const Navbar = () => {
               Check Status
             </Link>
             <button className="navbar-item link-button" onClick={handleAdminClick}>
-              {isLoggedIn ? 'Admin Logout' : 'Admin Login'}
+              {isLoggedIn ? 'Logout' : 'Login'}
             </button>
             <button className="theme-toggle" onClick={toggleDarkMode}>
               {isDarkMode ? '☀️' : '🌙'}
@@ -144,7 +144,7 @@ const Navbar = () => {
           onClick={handleAdminClick}
         >
           <div className="bottom-nav-icon">{isLoggedIn ? '🚪' : '👤'}</div>
-          <span>{isLoggedIn ? 'Logout' : 'Admin'}</span>
+          <span>{isLoggedIn ? 'Logout' : 'Login'}</span>
         </button>
       </nav>
     </>
