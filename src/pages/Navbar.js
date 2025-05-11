@@ -1,13 +1,29 @@
 // Navbar.js
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import './Navbar.css';
+import Swal from 'sweetalert2';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(
     window.matchMedia('(prefers-color-scheme: dark)').matches
   );
+  // eslint-disable-next-line no-unused-vars
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  // Check if we're on mobile
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Toggle mobile menu
   const toggleMenu = () => {
@@ -23,47 +39,115 @@ const Navbar = () => {
   useEffect(() => {
     document.body.className = isDarkMode ? 'dark-mode' : 'light-mode';
   }, [isDarkMode]);
+  
+  // Check if admin is logged in
+  useEffect(() => {
+    const token = sessionStorage.getItem("token") || localStorage.getItem("token");
+    setIsLoggedIn(!!token);
+  }, [location.pathname]);
+  
+  // Handle admin tab click
+  const handleAdminClick = (e) => {
+    e.preventDefault();
+    
+    if (isLoggedIn) {
+      // If logged in, show logout confirmation
+      Swal.fire({
+        title: 'Logout?',
+        text: 'Are you sure you want to logout?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#dc3545',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Yes, logout',
+        cancelButtonText: 'Cancel'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          // Clear tokens
+          sessionStorage.removeItem("token");
+          localStorage.removeItem("token");
+          
+          Swal.fire({
+            icon: "success",
+            title: "Logged Out",
+            text: "You have been successfully logged out.",
+            confirmButtonColor: "#007bff",
+          }).then(() => {
+            setIsLoggedIn(false);
+            navigate("/admin-login");
+          });
+        }
+      });
+    } else {
+      // If not logged in, go to admin login page
+      navigate("/admin-login");
+    }
+    
+    setIsOpen(false);
+  };
+
+  // Check if a route is active
+  const isActive = (path) => {
+    return location.pathname === path;
+  };
 
   return (
-    <nav className="navbar">
-      <div className="navbar-container">
-        <Link to="/" className="navbar-logo">
-          Yellowmatics
+    <>
+      {/* Top Navbar (hidden on mobile) */}
+      <nav className="navbar top-navbar">
+        <div className="navbar-container">
+          <Link to="/" className="navbar-logo">
+            Yellowmatics
+          </Link>
+
+          {/* Hamburger Icon (only visible on tablets, not on phones) */}
+          <div className="hamburger tablet-only" onClick={toggleMenu}>
+            <span className={`bar ${isOpen ? 'open' : ''}`}></span>
+            <span className={`bar ${isOpen ? 'open' : ''}`}></span>
+            <span className={`bar ${isOpen ? 'open' : ''}`}></span>
+          </div>
+
+          {/* Navigation Menu */}
+          <div className={`navbar-menu ${isOpen ? 'active' : ''}`}>
+            <Link to="/" className="navbar-item" onClick={() => setIsOpen(false)}>
+              Home
+            </Link>
+            <Link to="/check-status" className="navbar-item" onClick={() => setIsOpen(false)}>
+              Check Status
+            </Link>
+            <button className="navbar-item link-button" onClick={handleAdminClick}>
+              {isLoggedIn ? 'Admin Logout' : 'Admin Login'}
+            </button>
+            <button className="theme-toggle" onClick={toggleDarkMode}>
+              {isDarkMode ? '☀️' : '🌙'}
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      {/* Bottom Navigation for Mobile */}
+      <nav className="bottom-navbar">
+        <Link to="/" className={`bottom-nav-item ${isActive('/') ? 'active' : ''}`}>
+          <div className="bottom-nav-icon">🏠</div>
+          <span>Home</span>
         </Link>
-
-        {/* Hamburger Icon */}
-        <div className="hamburger" onClick={toggleMenu}>
-          <span className={`bar ${isOpen ? 'open' : ''}`}></span>
-          <span className={`bar ${isOpen ? 'open' : ''}`}></span>
-          <span className={`bar ${isOpen ? 'open' : ''}`}></span>
-        </div>
-
-        {/* Navigation Menu */}
-        <div className={`navbar-menu ${isOpen ? 'active' : ''}`}>
-          <Link to="/" className="navbar-item" onClick={() => setIsOpen(false)}>
-            Home
-          </Link>
-          {/* <Link to="/" className="navbar-item" onClick={() => setIsOpen(false)}>
-            About
-          </Link>
-          <Link to="/" className="navbar-item" onClick={() => setIsOpen(false)}>
-            Services
-          </Link>
-          <Link to="/" className="navbar-item" onClick={() => setIsOpen(false)}>
-            Contact
-          </Link> */}
-          <Link to="/check-status" className="navbar-item" onClick={() => setIsOpen(false)}>
-            Check Status
-          </Link>
-          <Link to="/admin-login" className="navbar-item" onClick={() => setIsOpen(false)}>
-            Admin Login
-          </Link>
-          <button className="theme-toggle" onClick={toggleDarkMode}>
-            {isDarkMode ? '☀️' : '🌙'}
-          </button>
-        </div>
-      </div>
-    </nav>
+        <Link to="/check-status" className={`bottom-nav-item ${isActive('/check-status') ? 'active' : ''}`}>
+          <div className="bottom-nav-icon">🔍</div>
+          <span>Status</span>
+        </Link>
+        <button className="bottom-nav-item theme-toggle-mobile" onClick={toggleDarkMode}>
+          <div className="bottom-nav-icon">{isDarkMode ? '☀️' : '🌙'}</div>
+          <span>Theme</span>
+        </button>
+        <button 
+          className={`bottom-nav-item link-button ${isActive('/admin-login') || isActive('/admin') ? 'active' : ''}`}
+          onClick={handleAdminClick}
+        >
+          <div className="bottom-nav-icon">{isLoggedIn ? '🚪' : '👤'}</div>
+          <span>{isLoggedIn ? 'Logout' : 'Admin'}</span>
+        </button>
+      </nav>
+    </>
   );
 };
 

@@ -43,12 +43,58 @@ export default function AdminLogin() {
     }
   };
 
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      handleLogin();
+    }
+  };
+
   return (
-    <div className="login-container">
-      <h2>Admin Login</h2>
-      <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
-      <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
-      <button onClick={handleLogin}>Login</button>
+    <div className="admin-login-container">
+      <div className="brand-header">
+        <h1 className="brand-title">Yellowmatics</h1>
+      </div>
+      
+      <div className="login-card">
+        <div className="login-header">
+          <h2>Admin Login</h2>
+          <div className="login-subtitle">Enter your credentials to access the admin panel</div>
+        </div>
+        
+        <div className="login-form">
+          <div className="input-group">
+            <label htmlFor="email">Email</label>
+            <input 
+              id="email"
+              type="email" 
+              placeholder="Enter your email" 
+              value={email} 
+              onChange={(e) => setEmail(e.target.value)}
+              onKeyDown={handleKeyPress}
+            />
+          </div>
+          
+          <div className="input-group">
+            <label htmlFor="password">Password</label>
+            <input 
+              id="password"
+              type="password" 
+              placeholder="Enter your password" 
+              value={password} 
+              onChange={(e) => setPassword(e.target.value)}
+              onKeyDown={handleKeyPress}
+            />
+          </div>
+          
+          <button className="login-button" onClick={handleLogin}>
+            Sign In
+          </button>
+        </div>
+        
+        <div className="login-footer">
+          <p>Event Management System</p>
+        </div>
+      </div>
     </div>
   );
 }

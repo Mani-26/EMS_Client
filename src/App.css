@@ -273,6 +273,27 @@ body.dark-mode .navbar-item {
   z-index: 1; /* Lower than modal */
 }
 
+/* Add bottom padding on mobile for the bottom navbar */
+@media (max-width: 768px) {
+  .home-container,
+  .register-container,
+  .admin-container,
+  .login-container {
+    margin-bottom: 5rem; /* Extra space at bottom for the navbar */
+  }
+  
+  /* Adjust floating button position to avoid bottom navbar */
+  .floating-button {
+    bottom: 5rem;
+    right: 1rem;
+    width: 3.5rem;
+    height: 3.5rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    position: fixed !important; /* Ensure it stays fixed */
+    z-index: 1001 !important; /* Ensure it's above everything */
+  }
+}
+
 .events-list {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -329,11 +350,17 @@ body.dark-mode .event-date {
 /* ================================= */
 .admin-container {
   max-width: 1200px;
-  margin: 5rem auto;
+  margin:  auto;
   text-align: center;
   padding: 0 2rem;
   position: relative;
   z-index: 1; /* Lower than modal */
+  padding-bottom: 6rem; /* Extra padding to ensure content doesn't hide behind floating button */
+}
+@media (min-width: 768px) {
+  .admin-container {
+    margin: 5rem 0rem auto; /* Extra space at bottom for the navbar */
+  }
 }
 
 .event-form {
@@ -395,8 +422,8 @@ body.dark-mode .event-form textarea {
 /* Floating "+" Button */
 .floating-button {
   position: fixed;
-  bottom: 2rem;
-  right: 2rem;
+  bottom: 6rem; /* Positioned above bottom navbar */
+  right: 1rem; /* Positioned at right edge */
   width: 4rem;
   height: 4rem;
   background: linear-gradient(135deg, var(--primary-gold) 0%, var(--primary-dark) 100%);
@@ -407,7 +434,39 @@ body.dark-mode .event-form textarea {
   font-weight: bold;
   cursor: pointer;
   transition: all 0.3s ease;
-  z-index: 10; /* Above content but below modal */
+  z-index: 1001; /* Higher than bottom navbar (1000) */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+@media (min-width: 768px) {
+  .floating-button {
+    bottom: 2rem; /* Adjusted for mobile */
+    right: 2rem; /* Adjusted for mobile */
+  }
+  
+}
+
+/* Tooltip for floating button */
+.floating-button::before {
+  content: "Create New Event";
+  position: absolute;
+  top: -40px;
+  right: 0;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.floating-button:hover::before {
+  opacity: 1;
 }
 
 body.light-mode .floating-button {
@@ -545,4 +604,214 @@ body.dark-mode .login-container input {
 .login-container button:hover {
   background: linear-gradient(135deg, var(--primary-dark) 0%, #806638 100%);
   transform: translateY(-2px);
+}
+
+/* Admin Login Container - Modern Style */
+.admin-login-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 2rem;
+}
+
+/* Brand header at the top */
+.brand-header {
+  text-align: center;
+  margin-bottom: 2rem;
+  width: 100%;
+}
+
+.brand-title {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin: 0;
+  letter-spacing: 1px;
+}
+
+body.light-mode .brand-title {
+  background: linear-gradient(135deg, var(--primary-gold) 0%, var(--primary-dark) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+  text-shadow: 0 2px 10px rgba(176, 141, 87, 0.2);
+}
+
+body.dark-mode .brand-title {
+  background: linear-gradient(135deg, var(--primary-gold) 0%, #d4af37 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+  text-shadow: 0 2px 10px rgba(212, 175, 55, 0.3);
+}
+
+/* Adjust for bottom navigation on mobile */
+@media (max-width: 768px) {
+  .admin-login-container {
+    padding-bottom: 5rem;
+  }
+  
+  .brand-title {
+    font-size: 2rem;
+  }
+}
+
+.login-card {
+  width: 100%;
+  max-width: 420px;
+  border-radius: 16px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  animation: fadeIn 0.5s ease-out;
+  margin-top: 0; /* Ensure no extra margin pushes content down */
+}
+
+body.light-mode .login-card {
+  background: var(--bg-light);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+body.dark-mode .login-card {
+  background: var(--bg-dark);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.login-header {
+  padding: 2rem 2rem 1rem;
+  text-align: center;
+  position: relative;
+}
+
+.login-header h2 {
+  margin: 0 0 0.5rem;
+  font-family: 'Playfair Display', serif;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+body.light-mode .login-header h2 {
+  background: linear-gradient(135deg, var(--primary-gold) 0%, var(--primary-dark) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+}
+
+body.dark-mode .login-header h2 {
+  background: linear-gradient(135deg, var(--primary-gold) 0%, #d4af37 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+}
+
+.login-subtitle {
+  font-size: 0.9rem;
+  opacity: 0.7;
+  margin-bottom: 1rem;
+}
+
+.login-form {
+  padding: 0 2rem 1.5rem;
+}
+
+.input-group {
+  margin-bottom: 1.5rem;
+  text-align: left;
+}
+
+.input-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+body.light-mode .input-group label {
+  color: #555;
+}
+
+body.dark-mode .input-group label {
+  color: #ccc;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+}
+
+body.light-mode .input-group input {
+  background: var(--input-bg-light);
+  border: 1px solid var(--border-light);
+  color: #333;
+}
+
+body.dark-mode .input-group input {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-dark);
+  color: var(--text-dark);
+}
+
+.input-group input:focus {
+  outline: none;
+  border-color: var(--primary-gold);
+}
+
+body.light-mode .input-group input:focus {
+  box-shadow: 0 0 0 3px rgba(176, 141, 87, 0.2);
+}
+
+body.dark-mode .input-group input:focus {
+  box-shadow: 0 0 0 3px rgba(176, 141, 87, 0.3);
+}
+
+.login-button {
+  width: 100%;
+  padding: 1rem;
+  background: linear-gradient(135deg, var(--primary-gold) 0%, var(--primary-dark) 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 1rem;
+  box-sizing: border-box;
+}
+
+.login-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(176, 141, 87, 0.4);
+}
+
+.login-button:active {
+  transform: translateY(0);
+}
+
+.login-footer {
+  padding: 1rem 2rem;
+  text-align: center;
+  font-size: 0.8rem;
+  opacity: 0.6;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+body.dark-mode .login-footer {
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }

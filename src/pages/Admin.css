@@ -1,8 +1,25 @@
 .admin-header {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
   align-items: center;
-  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.admin-header h1 {
+  font-size: 2rem;
+  white-space: nowrap;
+  width: 100%;
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .admin-header h1 {
+    font-size: 1.5rem;
+  }
+}
+
+.admin-header h1{
+  font-size: 2rem;
 }
 
 .logout-button {
@@ -14,6 +31,9 @@
   cursor: pointer;
   font-weight: 600;
   transition: all 0.3s ease;
+  margin-bottom: 1rem;
+  width: auto;
+  align-self: center;
 }
 
 .logout-button:hover {
@@ -25,6 +45,17 @@
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  width: 100%;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  box-sizing: border-box;
 }
 
 .fee-section {
@@ -76,6 +107,20 @@ body.dark-mode .event-fee {
   display: flex;
   gap: 1rem;
   justify-content: center;
+  width: 100%;
+}
+
+.form-actions button {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: none;
+  color: white;
+  background: linear-gradient(135deg, var(--primary-gold, #b08d57) 0%, var(--primary-dark, #8a6d3b) 100%);
 }
 
 .form-actions button:nth-child(2) {

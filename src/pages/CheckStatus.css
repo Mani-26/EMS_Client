@@ -61,6 +61,8 @@ body.dark-mode .form-group label {
   padding: 0.75rem;
   border-radius: 4px;
   font-size: 1rem;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 body.light-mode .input-field {
@@ -91,6 +93,8 @@ body.dark-mode .input-field {
   cursor: pointer;
   transition: all 0.3s ease;
   margin-top: 1rem;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .check-status-button:hover {
@@ -191,6 +195,7 @@ body.dark-mode .status-header {
 
 .status-body {
   padding: 1.5rem;
+  overflow: scroll;
 }
 
 .status-row {

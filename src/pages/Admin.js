@@ -444,9 +444,6 @@ export default function Admin() {
       <br />
       <div className="admin-header">
         <h1>🎯 Admin Dashboard</h1>
-        <button className="logout-button" onClick={handleLogout}>
-          🚪 Logout
-        </button>
       </div>
 
       {/* Event Form */}
@@ -670,7 +667,15 @@ export default function Admin() {
 
       {/* Floating Button */}
       {!showForm && (
-        <button className="floating-button" onClick={() => setShowForm(true)}>
+        <button 
+          className="floating-button" 
+          onClick={() => {
+            // Scroll to top of the page
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            // Show the form after a slight delay to ensure scroll completes
+            setTimeout(() => setShowForm(true), 300);
+          }}
+        >
           +
         </button>
       )}
