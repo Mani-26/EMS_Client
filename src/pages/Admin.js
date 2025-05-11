@@ -85,41 +85,71 @@ export default function Admin() {
     });
     
     try {
-      const response = await axios.get(
-        `${process.env.REACT_APP_API_URL}/api/events/${eventId}/download`,
-        { responseType: "blob" }
-      );
+      // Detect if running in a mobile app WebView
+      const isInAppBrowser = 
+        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) &&
+        !window.matchMedia('(display-mode: browser)').matches;
       
       // Create a clean filename
       const cleanFileName = `${eventName.replace(/[^a-zA-Z0-9]/g, '_')}_Registrations.xlsx`;
       
-      // Create download link
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute("download", cleanFileName);
-      document.body.appendChild(link);
-      link.click();
-      
-      // Clean up
-      window.URL.revokeObjectURL(url);
-      link.parentNode.removeChild(link);
-      
-      // Show success message
-      Swal.fire({
-        icon: "success",
-        title: "Downloaded!",
-        html: `
-          <p>Excel file downloaded successfully.</p>
-          <p style="font-size: 0.9rem; margin-top: 10px;">
-            <strong>File:</strong> ${cleanFileName}<br>
-            <span style="font-size: 0.8rem; color: #666;">
-              The file includes complete registration details.
-            </span>
-          </p>
-        `,
-        confirmButtonColor: "#28a745",
-      });
+      if (isInAppBrowser) {
+        // For mobile apps, use a direct window.open approach
+        // This opens the file in a new tab/window which is safer for WebViews
+        const downloadUrl = `${process.env.REACT_APP_API_URL}/api/events/${eventId}/download?filename=${encodeURIComponent(cleanFileName)}`;
+        
+        // Open in current window to avoid popup blockers in WebViews
+        window.location.href = downloadUrl;
+        
+        // Show a different success message for mobile apps
+        setTimeout(() => {
+          Swal.fire({
+            icon: "success",
+            title: "Download Started",
+            html: `
+              <p>Your file should be downloading now.</p>
+              <p style="font-size: 0.9rem; margin-top: 10px;">
+                <strong>Note:</strong> Check your device's download folder or notifications for the file.
+              </p>
+            `,
+            confirmButtonColor: "#28a745",
+          });
+        }, 2000);
+      } else {
+        // For desktop browsers, use the original approach
+        const response = await axios.get(
+          `${process.env.REACT_APP_API_URL}/api/events/${eventId}/download`,
+          { responseType: "blob" }
+        );
+        
+        // Create download link
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement("a");
+        link.href = url;
+        link.setAttribute("download", cleanFileName);
+        document.body.appendChild(link);
+        link.click();
+        
+        // Clean up
+        window.URL.revokeObjectURL(url);
+        link.parentNode.removeChild(link);
+        
+        // Show success message for desktop
+        Swal.fire({
+          icon: "success",
+          title: "Downloaded!",
+          html: `
+            <p>Excel file downloaded successfully.</p>
+            <p style="font-size: 0.9rem; margin-top: 10px;">
+              <strong>File:</strong> ${cleanFileName}<br>
+              <span style="font-size: 0.8rem; color: #666;">
+                The file includes complete registration details.
+              </span>
+            </p>
+          `,
+          confirmButtonColor: "#28a745",
+        });
+      }
     } catch (error) {
       console.error("Excel download error:", error);
       
