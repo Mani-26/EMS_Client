@@ -76,8 +76,8 @@ export default function Admin() {
   const handleDownloadExcel = async (eventId, eventName) => {
     // Show loading message
     Swal.fire({
-      title: 'Generating Excel File',
-      text: 'Please wait while we prepare your download...',
+      title: 'Preparing Excel File',
+      text: 'Please wait while we prepare your file...',
       allowOutsideClick: false,
       didOpen: () => {
         Swal.showLoading();
@@ -85,36 +85,49 @@ export default function Admin() {
     });
     
     try {
-      // Detect if running in a mobile app WebView
-      const isInAppBrowser = 
-        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) &&
-        !window.matchMedia('(display-mode: browser)').matches;
-      
       // Create a clean filename
       const cleanFileName = `${eventName.replace(/[^a-zA-Z0-9]/g, '_')}_Registrations.xlsx`;
       
-      if (isInAppBrowser) {
-        // For mobile apps, use a direct window.open approach
-        // This opens the file in a new tab/window which is safer for WebViews
-        const downloadUrl = `${process.env.REACT_APP_API_URL}/api/events/${eventId}/download?filename=${encodeURIComponent(cleanFileName)}`;
-        
-        // Open in current window to avoid popup blockers in WebViews
-        window.location.href = downloadUrl;
-        
-        // Show a different success message for mobile apps
-        setTimeout(() => {
-          Swal.fire({
-            icon: "success",
-            title: "Download Started",
-            html: `
-              <p>Your file should be downloading now.</p>
-              <p style="font-size: 0.9rem; margin-top: 10px;">
-                <strong>Note:</strong> Check your device's download folder or notifications for the file.
-              </p>
-            `,
-            confirmButtonColor: "#28a745",
-          });
-        }, 2000);
+      // Detect device type
+      const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      const isInAppBrowser = isMobileDevice && !window.matchMedia('(display-mode: browser)').matches;
+      
+      // Generate the download URL
+      const downloadUrl = `${process.env.REACT_APP_API_URL}/api/events/${eventId}/download?filename=${encodeURIComponent(cleanFileName)}`;
+      
+      if (isMobileDevice || isInAppBrowser) {
+        // For mobile devices or app WebViews, show a dialog with a link
+        Swal.fire({
+          icon: "info",
+          title: "Download Ready",
+          html: `
+            <p>Your Excel file is ready to download.</p>
+            <p style="margin: 15px 0;">
+              <a href="${downloadUrl}" target="_blank" class="download-link" style="
+                display: block;
+                background-color: #28a745;
+                color: white;
+                padding: 10px 15px;
+                border-radius: 5px;
+                text-decoration: none;
+                font-weight: bold;
+                margin: 10px auto;
+                max-width: 250px;
+                text-align: center;
+              ">
+                <i class="fas fa-download" style="margin-right: 8px;"></i>
+                Open Download Link
+              </a>
+            </p>
+            <p style="font-size: 0.9rem; color: #666; margin-top: 10px;">
+              Click the link above to open the file in your browser.<br>
+              From there, you can download or save the file.
+            </p>
+          `,
+          confirmButtonText: "Close",
+          confirmButtonColor: "#6c757d",
+          showCloseButton: true,
+        });
       } else {
         // For desktop browsers, use the original approach
         const response = await axios.get(
