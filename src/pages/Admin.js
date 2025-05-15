@@ -5,8 +5,83 @@ import { useNavigate } from "react-router-dom";
 import "./Admin.css"; // Admin page styles
 import "../styles/sweetalert-dark.css"; // Import SweetAlert dark mode styles
 
+
+
 export default function Admin() {
   const navigate = useNavigate();
+  
+  // Check for dark mode
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  
+  // Function to generate input styles based on dark mode
+  const getInputStyles = () => {
+    return {
+      width: '90%',
+      padding: '12px 15px',
+      border: isDarkMode ? '1px solid #444' : '1px solid #ccc',
+      borderRadius: '8px',
+      fontSize: '16px',
+      transition: 'all 0.3s ease',
+      boxShadow: isDarkMode ? '0 1px 3px rgba(0,0,0,0.3)' : '0 1px 3px rgba(0,0,0,0.1)',
+      outline: 'none',
+      backgroundColor: isDarkMode ? '#333' : '#fff',
+      color: isDarkMode ? '#f5f5f5' : '#333'
+    };
+  };
+  
+  // Add animation styles and detect dark mode when component mounts
+  useEffect(() => {
+    const slideDownAnimation = `
+      @keyframes slideDown {
+        from { opacity: 0; transform: translateY(-20px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      
+      @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+      
+      @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        90% { transform: scale(1); }
+      }
+      
+      @keyframes slideUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+    `;
+    
+    const styleElement = document.createElement('style');
+    styleElement.textContent = slideDownAnimation;
+    document.head.appendChild(styleElement);
+    
+    // Check if dark mode is active
+    const isDark = document.body.classList.contains('dark-mode');
+    setIsDarkMode(isDark);
+    
+    // Listen for theme changes
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.attributeName === 'class') {
+          const isDark = document.body.classList.contains('dark-mode');
+          setIsDarkMode(isDark);
+        }
+      });
+    });
+    
+    observer.observe(document.body, { attributes: true });
+    
+    return () => {
+      if (document.head.contains(styleElement)) {
+        document.head.removeChild(styleElement);
+      }
+      observer.disconnect();
+    };
+  }, []);
+  
   const [formData, setFormData] = useState({
     name: "",
     date: "",
@@ -111,7 +186,7 @@ export default function Admin() {
           html: `
             <p>Your Excel file is ready to download.</p>
             <div style="display: flex; flex-direction: column; gap: 12px; margin: 15px 0;">
-              <button id="copyLinkBtn" class="download-link" style="width: 100%; cursor: pointer; border: none; background: #28a745; color: white; font-weight: bold;">
+              <button id="copyLinkBtn" class="download-link" style="width: 90%; cursor: pointer; border: none; background: #28a745; color: white; font-weight: bold;">
                 Copy Download Link
               </button>
               <a href="${downloadUrl}" target="_blank" class="download-link" style="background: #6c757d; text-align: center;">
@@ -148,7 +223,7 @@ export default function Admin() {
                   title: "Manual Copy Required",
                   html: `
                     <p>Please copy this link manually:</p>
-                    <textarea readonly style="width: 100%; padding: 10px; margin: 10px 0; border-radius: 4px; border: 1px solid #ddd;">${downloadUrl}</textarea>
+                    <textarea readonly style="width: 90%; padding: 10px; margin: 10px 0; border-radius: 4px; border: 1px solid #ddd;">${downloadUrl}</textarea>
                   `,
                   confirmButtonColor: "#28a745",
                 });
@@ -167,7 +242,7 @@ export default function Admin() {
               <a href="${downloadUrl}" target="_blank" class="download-link" style="background: #28a745; text-align: center;">
                 Open in Browser
               </a>
-              <button id="copyLinkBtn" class="download-link" style="width: 100%; cursor: pointer; border: none; background: #6c757d; color: white; font-weight: bold;">
+              <button id="copyLinkBtn" class="download-link" style="width: 90%; cursor: pointer; border: none; background: #6c757d; color: white; font-weight: bold;">
                 Copy Download Link
               </button>
             </div>
@@ -202,7 +277,7 @@ export default function Admin() {
                   title: "Manual Copy Required",
                   html: `
                     <p>Please copy this link manually:</p>
-                    <textarea readonly style="width: 100%; padding: 10px; margin: 10px 0; border-radius: 4px; border: 1px solid #ddd;">${downloadUrl}</textarea>
+                    <textarea readonly style="width: 90%; padding: 10px; margin: 10px 0; border-radius: 4px; border: 1px solid #ddd;">${downloadUrl}</textarea>
                   `,
                   confirmButtonColor: "#28a745",
                 });
@@ -625,25 +700,56 @@ export default function Admin() {
       </div>
 
       {/* Event Form */}
-      {console.log("Rendering form section, showForm:", showForm, "editingEvent:", editingEvent)}
+      {console.log("Rendering form section, showForm:", showForm, "editingEvent:", editingEvent, "isDarkMode:", isDarkMode)}
       {showForm && (
-        <div style={{
-          backgroundColor: '#ffffff',
-          padding: '30px',
-          borderRadius: '10px',
-          boxShadow: '0 4px 10px rgba(0,0,0,0.1)',
-          marginBottom: '30px',
-          border: '1px solid #e0e0e0'
-        }}>
-          <h2 style={{marginBottom: '20px', color: editingEvent ? '#007bff' : '#28a745', textAlign: 'center'}}>
+        <div 
+          className={`event-form-container ${isDarkMode ? 'dark-mode' : 'light-mode'}`}
+          style={{
+            backgroundColor: isDarkMode ? '#2c3e50' : '#ffffff',
+            padding: window.innerWidth <= 480 ? '20px' : window.innerWidth <= 768 ? '25px' : '30px',
+            borderRadius: window.innerWidth <= 480 ? '8px' : '10px',
+            boxShadow: isDarkMode ? '0 4px 15px rgba(0,0,0,0.3)' : '0 4px 15px rgba(0,0,0,0.1)',
+            marginBottom: window.innerWidth <= 768 ? '20px' : '30px',
+            border: isDarkMode ? '1px solid #34495e' : '1px solid #e0e0e0',
+            animation: 'slideDown 0.5s ease-out',
+            transform: 'translateZ(0)', /* Force hardware acceleration */
+            maxWidth: '900px',
+            margin: '0 auto 30px auto',
+            color: isDarkMode ? '#f5f5f5' : '#333',
+            overflowX: 'hidden'
+          }}>
+          <h2 style={{
+            marginBottom: window.innerWidth <= 480 ? '15px' : '25px', 
+            color: editingEvent 
+              ? (isDarkMode ? '#4dabf7' : '#007bff') 
+              : (isDarkMode ? '#40c057' : '#28a745'), 
+            textAlign: 'center',
+            fontFamily: "'Playfair Display', serif",
+            fontSize: window.innerWidth <= 480 ? '22px' : window.innerWidth <= 768 ? '24px' : '28px',
+            fontWeight: 'bold',
+            animation: 'fadeIn 0.7s ease-out',
+            textShadow: isDarkMode ? '0 2px 4px rgba(0,0,0,0.3)' : 'none',
+            padding: '0 10px'
+          }}>
             {editingEvent ? "✏️ Edit Event" : "➕ New Event"}
           </h2>
           {console.log("Form data being rendered:", JSON.stringify(formData, null, 2))}
           
-          <form onSubmit={handleSaveEvent}>
-          <div style={{marginBottom: '20px'}}>
+          <form 
+            className={`event-edit-form ${isDarkMode ? 'dark-mode' : 'light-mode'}`}
+            onSubmit={handleSaveEvent}>
+          <div style={{
+            marginBottom: '20px',
+            animation: 'fadeIn 0.8s ease-out'
+          }}>
             <div style={{marginBottom: '15px'}}>
-              <label style={{display: 'block', marginBottom: '5px', fontWeight: 'bold'}}>Event Name</label>
+              <label style={{
+                display: 'block', 
+                marginBottom: '8px', 
+                fontWeight: 'bold',
+                color: isDarkMode ? '#f5f5f5' : '#333',
+                fontSize: '16px'
+              }}>Event Name</label>
               <input
                 type="text"
                 name="name"
@@ -651,28 +757,40 @@ export default function Admin() {
                 value={formData.name || ""}
                 onChange={handleInputChange}
                 style={{
-                  width: '100%',
-                  padding: '10px',
+                  width: '90%',
+                  padding: '12px 15px',
                   border: '1px solid #ccc',
-                  borderRadius: '4px',
-                  fontSize: '16px'
+                  borderRadius: '8px',
+                  fontSize: '16px',
+                  transition: 'all 0.3s ease',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+                  outline: 'none'
                 }}
               />
             </div>
             
             <div style={{marginBottom: '15px'}}>
-              <label style={{display: 'block', marginBottom: '5px', fontWeight: 'bold'}}>Event Date</label>
+              <label style={{
+                display: 'block', 
+                marginBottom: '8px', 
+                fontWeight: 'bold',
+                color: '#333',
+                fontSize: '16px'
+              }}>Event Date</label>
               <input
                 type="date"
                 name="date"
                 value={formData.date || ""}
                 onChange={handleInputChange}
                 style={{
-                  width: '100%',
-                  padding: '10px',
+                  width: '90%',
+                  padding: '12px 15px',
                   border: '1px solid #ccc',
-                  borderRadius: '4px',
-                  fontSize: '16px'
+                  borderRadius: '8px',
+                  fontSize: '16px',
+                  transition: 'all 0.3s ease',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+                  outline: 'none'
                 }}
               />
             </div>
@@ -686,7 +804,7 @@ export default function Admin() {
                 onChange={handleInputChange}
                 rows="4"
                 style={{
-                  width: '100%',
+                  width: '90%',
                   padding: '10px',
                   border: '1px solid #ccc',
                   borderRadius: '4px',
@@ -705,7 +823,7 @@ export default function Admin() {
                 value={formData.venue || ""}
                 onChange={handleInputChange}
                 style={{
-                  width: '100%',
+                  width: '90%',
                   padding: '10px',
                   border: '1px solid #ccc',
                   borderRadius: '4px',
@@ -724,7 +842,7 @@ export default function Admin() {
                 onChange={handleInputChange}
                 min="1"
                 style={{
-                  width: '100%',
+                  width: '90%',
                   padding: '10px',
                   border: '1px solid #ccc',
                   borderRadius: '4px',
@@ -776,7 +894,7 @@ export default function Admin() {
                     onChange={handleInputChange}
                     min="1"
                     style={{
-                      width: '100%',
+                      width: '90%',
                       padding: '10px',
                       border: '1px solid #ccc',
                       borderRadius: '4px',
@@ -790,22 +908,40 @@ export default function Admin() {
 
           {/* Custom Fields Section */}
           <div style={{
-            marginTop: '30px', 
+            marginTop: '40px', 
             borderTop: '1px solid #ddd', 
-            paddingTop: '20px'
+            paddingTop: '30px',
+            animation: 'fadeIn 1s ease-out'
           }}>
-            <h3 style={{marginBottom: '10px', fontSize: '18px'}}>Custom Registration Fields</h3>
-            <p style={{marginBottom: '15px', color: '#666', fontSize: '14px'}}>
+            <h3 style={{
+              marginBottom: '12px', 
+              fontSize: '20px',
+              color: '#333',
+              fontFamily: "'Playfair Display', serif",
+              textAlign: 'center'
+            }}>Custom Registration Fields</h3>
+            <p style={{
+              marginBottom: '20px', 
+              color: '#666', 
+              fontSize: '15px',
+              textAlign: 'center',
+              maxWidth: '700px',
+              margin: '0 auto 25px auto'
+            }}>
               Add custom fields to collect additional information from registrants.
             </p>
             
             {Array.isArray(formData.customFields) && formData.customFields.map((field, index) => (
               <div key={index} style={{
                 marginBottom: '20px',
-                padding: '15px',
+                padding: '20px',
                 border: '1px solid #ddd',
-                borderRadius: '8px',
-                backgroundColor: '#f9f9f9'
+                borderRadius: '10px',
+                backgroundColor: '#f9f9f9',
+                boxShadow: '0 2px 5px rgba(0,0,0,0.05)',
+                animation: 'slideUp 0.5s ease-out',
+                animationDelay: `${index * 0.1}s`,
+                animationFillMode: 'both'
               }}>
                 <div style={{
                   display: 'grid',
@@ -825,7 +961,7 @@ export default function Admin() {
                         setFormData({...formData, customFields: updatedFields});
                       }}
                       style={{
-                        width: '100%',
+                        width: '90%',
                         padding: '10px',
                         border: '1px solid #ccc',
                         borderRadius: '4px',
@@ -844,7 +980,7 @@ export default function Admin() {
                         setFormData({...formData, customFields: updatedFields});
                       }}
                       style={{
-                        width: '100%',
+                        width: '90%',
                         padding: '10px',
                         border: '1px solid #ccc',
                         borderRadius: '4px',
@@ -879,7 +1015,7 @@ export default function Admin() {
                         setFormData({...formData, customFields: updatedFields});
                       }}
                       style={{
-                        width: '100%',
+                        width: '90%',
                         padding: '10px',
                         border: '1px solid #ccc',
                         borderRadius: '4px',
@@ -942,7 +1078,7 @@ export default function Admin() {
                         setFormData({...formData, customFields: updatedFields});
                       }}
                       style={{
-                        width: '100%',
+                        width: '90%',
                         padding: '10px',
                         border: '1px solid #ccc',
                         borderRadius: '4px',
@@ -973,15 +1109,29 @@ export default function Admin() {
                 backgroundColor: '#28a745',
                 color: 'white',
                 border: 'none',
-                borderRadius: '4px',
-                padding: '10px 15px',
+                borderRadius: '30px',
+                padding: '12px 25px',
                 cursor: 'pointer',
-                fontSize: '14px',
+                fontSize: '15px',
                 fontWeight: 'bold',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                margin: '0 auto'
+                margin: '5px auto',
+                boxShadow: '0 4px 8px rgba(40, 167, 69, 0.3)',
+                transition: 'all 0.3s ease',
+                animation: 'pulse 2s infinite ease-in-out',
+                letterSpacing: '0.5px'
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.backgroundColor = '#218838';
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = '0 6px 12px rgba(40, 167, 69, 0.4)';
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.backgroundColor = '#28a745';
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 4px 8px rgba(40, 167, 69, 0.3)';
               }}
             >
               + Add Custom Field
@@ -989,23 +1139,37 @@ export default function Admin() {
           </div>
           
           <div style={{
-            marginTop: '30px', 
-            display: 'flex', 
-            gap: '15px', 
-            justifyContent: 'center'
+            marginTop: '10px', 
+            display: 'block', 
+            animation: 'fadeIn 1.2s ease-out'
           }}>
             <button 
               type="submit"
               style={{
-                padding: '12px 25px',
+                padding: '10px',
+                margin:"10px",
                 backgroundColor: editingEvent ? '#007bff' : '#28a745',
                 color: 'white',
                 border: 'none',
-                borderRadius: '5px',
+                borderRadius: '30px',
                 fontWeight: 'bold',
                 cursor: 'pointer',
                 fontSize: '16px',
-                minWidth: '150px'
+                minWidth: '180px',
+                boxShadow: `0 4px 10px ${editingEvent ? 'rgba(0, 123, 255, 0.3)' : 'rgba(40, 167, 69, 0.3)'}`,
+                transition: 'all 0.3s ease',
+                letterSpacing: '0.5px',
+                textTransform: 'uppercase'
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.backgroundColor = editingEvent ? '#0069d9' : '#218838';
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = `0 6px 15px ${editingEvent ? 'rgba(0, 123, 255, 0.4)' : 'rgba(40, 167, 69, 0.4)'}`;
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.backgroundColor = editingEvent ? '#007bff' : '#28a745';
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = `0 4px 10px ${editingEvent ? 'rgba(0, 123, 255, 0.3)' : 'rgba(40, 167, 69, 0.3)'}`;
               }}
             >
               {editingEvent ? "Update Event" : "Create Event"}
@@ -1013,15 +1177,29 @@ export default function Admin() {
             <button 
               type="button"
               style={{
-                padding: '12px 25px',
+                padding: '10px',
                 backgroundColor: '#6c757d',
                 color: 'white',
                 border: 'none',
-                borderRadius: '5px',
+                borderRadius: '30px',
                 fontWeight: 'bold',
                 cursor: 'pointer',
                 fontSize: '16px',
-                minWidth: '150px'
+                minWidth: '180px',
+                boxShadow: '0 4px 10px rgba(108, 117, 125, 0.3)',
+                transition: 'all 0.3s ease',
+                letterSpacing: '0.5px',
+                textTransform: 'uppercase'
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.backgroundColor = '#5a6268';
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = '0 6px 15px rgba(108, 117, 125, 0.4)';
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.backgroundColor = '#6c757d';
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 4px 10px rgba(108, 117, 125, 0.3)';
               }}
               onClick={() => {
                 // Scroll to top of the page
@@ -1167,7 +1345,7 @@ export default function Admin() {
         {events.length === 0 ? (
           <p className="no-events">No events available. Create one to get started!</p>
         ) : (
-          <div className="event-list">
+          <div className="event-list events-grid">
             {events.map((event) => (
               <div key={event._id} className="event-card">
                 <h3>{event.name}</h3>
