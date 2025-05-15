@@ -48,6 +48,7 @@ function App() {
   return (
     <Router>
       {pageLoading && <div className="page-transition-loader"></div>}
+      <div className="page-background animate-gpu"></div>
       <Navbar />
       <Routes>
         <Route path="/" element={<Home />} />

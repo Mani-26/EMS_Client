@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 // import Swal from 'sweetalert2';
 // import { useNavigate } from 'react-router-dom';
 import './CheckStatus.css';
 import '../styles/sweetalert-dark.css'; // Import SweetAlert dark mode styles
+import '../styles/animations.css'; // Import animations
 
 export default function CheckStatus() {
   const [ticketId, setTicketId] = useState('');
@@ -74,12 +75,53 @@ export default function CheckStatus() {
         return status;
     }
   };
+  
+  // Scroll animation with Intersection Observer
+  useEffect(() => {
+    const formGroups = document.querySelectorAll('.form-group');
+    const formSections = document.querySelectorAll('.status-form-container, .status-result, .status-card');
+    
+    const appearOptions = {
+      threshold: 0.1,
+      rootMargin: "0px 0px -50px 0px"
+    };
+    
+    const appearOnScroll = new IntersectionObserver(function(entries, appearOnScroll) {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) {
+          return;
+        } else {
+          entry.target.classList.add('appear');
+          appearOnScroll.unobserve(entry.target);
+        }
+      });
+    }, appearOptions);
+    
+    // Observe form groups
+    formGroups.forEach(group => {
+      appearOnScroll.observe(group);
+    });
+    
+    // Observe form sections
+    formSections.forEach(section => {
+      appearOnScroll.observe(section);
+    });
+    
+    return () => {
+      formGroups.forEach(group => {
+        appearOnScroll.unobserve(group);
+      });
+      formSections.forEach(section => {
+        appearOnScroll.unobserve(section);
+      });
+    };
+  }, [registrationData]); // Re-run when registration data changes
 
   return (
     <div className="check-status-container">
-      <h1>Check Registration Status</h1>
+      <h1 className="staggered-entrance">Check Registration Status</h1>
       
-      <div className="status-form-container">
+      <div className="status-form-container form-section">
         <form onSubmit={handleSubmit} className="status-form">
           <div className="form-group">
             <label htmlFor="ticketId">Ticket ID</label>
@@ -107,62 +149,70 @@ export default function CheckStatus() {
             />
           </div>
           
-          {error && <div className="error-message">{error}</div>}
+          {error && <div className="error-message animated-error">{error}</div>}
           
-          <button 
-            type="submit" 
-            className="check-status-button"
-            disabled={isLoading}
-          >
-            {isLoading ? 'Checking...' : 'Check Status'}
-          </button>
+          <div className="form-group">
+            <button 
+              type="submit" 
+              className="check-status-button"
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <span className="btn-loading">
+                  <span className="btn-text">Checking...</span>
+                </span>
+              ) : (
+                'Check Status'
+              )}
+            </button>
+          </div>
         </form>
       </div>
       
       {registrationData && (
-        <div className="status-result">
-          <h2>Registration Details</h2>
+        <div className="status-result form-section">
+          <h2 className="staggered-entrance">Registration Details</h2>
           
-          <div className="status-card">
+          <div className="status-card card-entrance">
             <div className="status-header">
-              <span className={getStatusBadgeClass(registrationData.paymentStatus)}>
+              <span className={`${getStatusBadgeClass(registrationData.paymentStatus)} pulse-animation`}>
                 {getStatusText(registrationData.paymentStatus)}
               </span>
             </div>
             
             <div className="status-body">
-              <div className="status-row">
+              <div className="status-row form-group">
                 <span className="status-label">Name:</span>
                 <span className="status-value">{registrationData.name}</span>
               </div>
               
-              <div className="status-row">
+              <div className="status-row form-group">
                 <span className="status-label">Email:</span>
                 <span className="status-value">{registrationData.email}</span>
               </div>
               
-              <div className="status-row">
+              <div className="status-row form-group">
                 <span className="status-label">Phone:</span>
                 <span className="status-value">{registrationData.phone || 'Not provided'}</span>
               </div>
               
-              <div className="status-row">
+              <div className="status-row form-group">
                 <span className="status-label">Ticket ID:</span>
                 <span className="status-value">{registrationData.ticketId}</span>
               </div>
               
-              <div className="status-row">
+              <div className="status-row form-group">
                 <span className="status-label">Event:</span>
                 <span className="status-value">{registrationData.eventName}</span>
               </div>
               
-              <div className="status-row">
+              <div className="status-row form-group">
                 <span className="status-label">Payment Method:</span>
                 <span className="status-value">{registrationData.paymentMethod?.toUpperCase() || 'N/A'}</span>
               </div>
               
               {registrationData.paymentVerified && (
-                <div className="status-row">
+                <div className="status-row form-group">
                   <span className="status-label">Verified On:</span>
                   <span className="status-value">{formatDate(registrationData.verificationDate)}</span>
                 </div>
@@ -170,16 +220,16 @@ export default function CheckStatus() {
             </div>
             
             {registrationData.ticket && (
-              <div className="ticket-qr-container">
+              <div className="ticket-qr-container form-group">
                 <h3>Your Ticket</h3>
-                <img src={registrationData.ticket} alt="Ticket QR Code" className="ticket-qr" />
+                <img src={registrationData.ticket} alt="Ticket QR Code" className="ticket-qr scale-in-animation" />
               </div>
             )}
           </div>
         </div>
       )}
       
-      <p className="back-link">
+      <p className="back-link staggered-entrance">
         <a href="/" className="navbar-item">← Back to Home</a>
       </p>
     </div>

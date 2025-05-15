@@ -115,6 +115,23 @@ body.dark-mode .input-field {
   box-shadow: 0 0 5px rgba(176, 141, 87, 0.2);
 }
 
+.form-hint {
+  display: block;
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+  color: #666;
+}
+
+body.dark-mode .form-hint {
+  color: #aaa;
+}
+
+.formatted-date {
+  font-style: italic;
+  color: var(--primary-gold);
+  font-weight: 500;
+}
+
 /* ================================= */
 /* Button Styles (Global) */
 /* ================================= */

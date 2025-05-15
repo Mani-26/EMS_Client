@@ -18,6 +18,11 @@ export default function Admin() {
     customFields: []
   });
   
+  // Ensure formData is properly initialized
+  useEffect(() => {
+    console.log("Current form data state:", formData);
+  }, [formData]);
+  
   // Function to handle logout
   const handleLogout = () => {
     // Clear tokens from both storage locations
@@ -294,8 +299,10 @@ export default function Admin() {
       }
       
       // Check for duplicate field names
-      const fieldNames = formData.customFields.map(field => field.fieldName);
-      const hasDuplicates = fieldNames.some((name, index) => fieldNames.indexOf(name) !== index);
+      const fieldNames = formData.customFields.map(field => field.fieldName.trim());
+      const hasDuplicates = fieldNames.some((name, index) => 
+        name && fieldNames.indexOf(name) !== index
+      );
       if (hasDuplicates) {
         Swal.fire({
           icon: "warning",
@@ -308,7 +315,7 @@ export default function Admin() {
       // Validate select fields have options
       const selectFieldsWithoutOptions = formData.customFields
         .filter(field => field.fieldType === 'select')
-        .some(field => !field.options || field.options.length === 0);
+        .some(field => !field.options || !Array.isArray(field.options) || field.options.length === 0);
         
       if (selectFieldsWithoutOptions) {
         Swal.fire({
@@ -408,24 +415,118 @@ export default function Admin() {
   };
 
   const handleEditEvent = (event) => {
+    // Add extensive debugging to see what we're getting
+    console.log("Edit event clicked with data:", JSON.stringify(event, null, 2));
+    console.log("Current form data before edit:", formData);
+    
+    // First, make sure we have a valid event object
+    if (!event || typeof event !== 'object') {
+      console.error("Invalid event object:", event);
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Could not load event data. Please try again.",
+      });
+      return;
+    }
+    
     // Scroll to top of the page
     window.scrollTo({ top: 0, behavior: 'smooth' });
     
-    // Set form data after a slight delay to ensure scroll completes
-    setTimeout(() => {
-      setEditingEvent(event);
-      setFormData({
-        name: event.name,
-        date: event.date.split("T")[0],
-        description: event.description,
-        venue: event.venue,
-        seatLimit: event.seatLimit,
-        isFree: event.isFree !== undefined ? event.isFree : true,
-        fee: event.fee || "",
-        customFields: event.customFields || []
+    // Set editing event state immediately
+    setEditingEvent(event);
+    
+    // Format the date properly
+    let formattedDate = "";
+    try {
+      if (event.date) {
+        // Try to handle ISO format first
+        if (typeof event.date === 'string' && event.date.includes('T')) {
+          formattedDate = event.date.split("T")[0];
+        } 
+        // Then try to handle date object
+        else if (event.date instanceof Date) {
+          formattedDate = event.date.toISOString().split("T")[0];
+        }
+        // Then try to parse as date
+        else {
+          const dateObj = new Date(event.date);
+          if (!isNaN(dateObj.getTime())) {
+            formattedDate = dateObj.toISOString().split("T")[0];
+          } else {
+            // If it's a string but not in ISO format, try to parse it
+            formattedDate = event.date;
+          }
+        }
+      }
+    } catch (e) {
+      console.error("Error formatting date:", e);
+      // If all else fails, try to use the raw value
+      formattedDate = event.date || "";
+    }
+    
+    console.log("Formatted date for form:", formattedDate);
+    
+    // Ensure custom fields are properly formatted
+    const formattedCustomFields = [];
+    if (Array.isArray(event.customFields)) {
+      event.customFields.forEach(field => {
+        formattedCustomFields.push({
+          fieldName: field.fieldName || '',
+          fieldType: field.fieldType || 'text',
+          placeholder: field.placeholder || '',
+          isRequired: Boolean(field.isRequired),
+          options: Array.isArray(field.options) ? [...field.options] : 
+                  (field.options ? field.options.split(',').map(opt => opt.trim()) : [])
+        });
       });
-      setShowForm(true);
-    }, 300);
+    }
+    
+    console.log("Formatted custom fields:", formattedCustomFields);
+    
+    // Create the form data object
+    const newFormData = {
+      name: event.name || "",
+      date: formattedDate,
+      description: event.description || "",
+      venue: event.venue || "",
+      seatLimit: event.seatLimit?.toString() || "",
+      isFree: event.isFree !== undefined ? Boolean(event.isFree) : true,
+      fee: event.fee?.toString() || "",
+      customFields: formattedCustomFields
+    };
+    
+    console.log("Setting form data to:", newFormData);
+    
+    // First set showForm to false to reset any previous state
+    setShowForm(false);
+    
+    // Force a state update with a clean new object
+    const cleanFormData = {
+      name: event.name || "",
+      date: formattedDate,
+      description: event.description || "",
+      venue: event.venue || "",
+      seatLimit: event.seatLimit?.toString() || "",
+      isFree: event.isFree !== undefined ? Boolean(event.isFree) : true,
+      fee: event.fee?.toString() || "",
+      customFields: formattedCustomFields
+    };
+    
+    console.log("Setting clean form data:", cleanFormData);
+    
+    // Use a timeout to ensure the state updates properly
+    setTimeout(() => {
+      // Set the form data and editing event state
+      setFormData(cleanFormData);
+      setEditingEvent({...event});
+      
+      // Show the form after a short delay
+      setTimeout(() => {
+        setShowForm(true);
+        console.log("Form should now be visible");
+      }, 50);
+    }, 50);
   };
 
   const fetchRegistrations = async (eventId, eventName) => {
@@ -515,7 +616,7 @@ export default function Admin() {
   };
 
   return (
-    <div className="admin-container">
+    <div className="admin-container" style={{maxWidth: '1200px', margin: '0 auto', padding: '20px'}}>
       <div className="admin-header">
         <h1>🎯 Admin Dashboard</h1>
         <button className="logout-button" onClick={handleLogout}>
@@ -524,168 +625,328 @@ export default function Admin() {
       </div>
 
       {/* Event Form */}
+      {console.log("Rendering form section, showForm:", showForm, "editingEvent:", editingEvent)}
       {showForm && (
-        <form className="event-form" onSubmit={handleSaveEvent}>
-          <h2>{editingEvent ? "✏️ Edit Event" : "➕ New Event"}</h2>
-          <div className="form-group">
-            <input
-              type="text"
-              name="name"
-              placeholder="Event Name"
-              value={formData.name}
-              onChange={handleInputChange}
-            />
-            <input
-              type="date"
-              name="date"
-              value={formData.date}
-              onChange={handleInputChange}
-            />
-            <textarea
-              name="description"
-              placeholder="Event Description"
-              value={formData.description}
-              onChange={handleInputChange}
-              rows="4"
-            />
-            <input
-              type="text"
-              name="venue"
-              placeholder="Event Venue"
-              value={formData.venue}
-              onChange={handleInputChange}
-            />
-            <input
-              type="number"
-              name="seatLimit"
-              placeholder="Seat Limit"
-              value={formData.seatLimit}
-              onChange={handleInputChange}
-              min="1"
-            />
+        <div style={{
+          backgroundColor: '#ffffff',
+          padding: '30px',
+          borderRadius: '10px',
+          boxShadow: '0 4px 10px rgba(0,0,0,0.1)',
+          marginBottom: '30px',
+          border: '1px solid #e0e0e0'
+        }}>
+          <h2 style={{marginBottom: '20px', color: editingEvent ? '#007bff' : '#28a745', textAlign: 'center'}}>
+            {editingEvent ? "✏️ Edit Event" : "➕ New Event"}
+          </h2>
+          {console.log("Form data being rendered:", JSON.stringify(formData, null, 2))}
+          
+          <form onSubmit={handleSaveEvent}>
+          <div style={{marginBottom: '20px'}}>
+            <div style={{marginBottom: '15px'}}>
+              <label style={{display: 'block', marginBottom: '5px', fontWeight: 'bold'}}>Event Name</label>
+              <input
+                type="text"
+                name="name"
+                placeholder="Enter event name"
+                value={formData.name || ""}
+                onChange={handleInputChange}
+                style={{
+                  width: '100%',
+                  padding: '10px',
+                  border: '1px solid #ccc',
+                  borderRadius: '4px',
+                  fontSize: '16px'
+                }}
+              />
+            </div>
             
-            <div className="fee-section">
-              <div className="fee-type">
-                <label>
+            <div style={{marginBottom: '15px'}}>
+              <label style={{display: 'block', marginBottom: '5px', fontWeight: 'bold'}}>Event Date</label>
+              <input
+                type="date"
+                name="date"
+                value={formData.date || ""}
+                onChange={handleInputChange}
+                style={{
+                  width: '100%',
+                  padding: '10px',
+                  border: '1px solid #ccc',
+                  borderRadius: '4px',
+                  fontSize: '16px'
+                }}
+              />
+            </div>
+            
+            <div style={{marginBottom: '15px'}}>
+              <label style={{display: 'block', marginBottom: '5px', fontWeight: 'bold'}}>Event Description</label>
+              <textarea
+                name="description"
+                placeholder="Enter event description"
+                value={formData.description || ""}
+                onChange={handleInputChange}
+                rows="4"
+                style={{
+                  width: '100%',
+                  padding: '10px',
+                  border: '1px solid #ccc',
+                  borderRadius: '4px',
+                  fontSize: '16px',
+                  resize: 'vertical'
+                }}
+              />
+            </div>
+            
+            <div style={{marginBottom: '15px'}}>
+              <label style={{display: 'block', marginBottom: '5px', fontWeight: 'bold'}}>Event Venue</label>
+              <input
+                type="text"
+                name="venue"
+                placeholder="Enter event venue"
+                value={formData.venue || ""}
+                onChange={handleInputChange}
+                style={{
+                  width: '100%',
+                  padding: '10px',
+                  border: '1px solid #ccc',
+                  borderRadius: '4px',
+                  fontSize: '16px'
+                }}
+              />
+            </div>
+            
+            <div style={{marginBottom: '15px'}}>
+              <label style={{display: 'block', marginBottom: '5px', fontWeight: 'bold'}}>Seat Limit</label>
+              <input
+                type="number"
+                name="seatLimit"
+                placeholder="Enter seat limit"
+                value={formData.seatLimit || ""}
+                onChange={handleInputChange}
+                min="1"
+                style={{
+                  width: '100%',
+                  padding: '10px',
+                  border: '1px solid #ccc',
+                  borderRadius: '4px',
+                  fontSize: '16px'
+                }}
+              />
+            </div>
+            
+            <div style={{
+              marginBottom: '15px',
+              padding: '15px',
+              backgroundColor: '#f8f9fa',
+              border: '1px solid #e9ecef',
+              borderRadius: '4px'
+            }}>
+              <label style={{display: 'block', marginBottom: '10px', fontWeight: 'bold'}}>Event Fee Type</label>
+              
+              <div style={{marginBottom: '10px'}}>
+                <label style={{display: 'inline-flex', alignItems: 'center', marginRight: '20px', cursor: 'pointer'}}>
                   <input
                     type="radio"
                     name="isFree"
                     checked={formData.isFree === true}
                     onChange={() => setFormData(prev => ({ ...prev, isFree: true, fee: "" }))}
+                    style={{marginRight: '8px'}}
                   />
                   Free Event
                 </label>
-                <label>
+                <label style={{display: 'inline-flex', alignItems: 'center', cursor: 'pointer'}}>
                   <input
                     type="radio"
                     name="isFree"
                     checked={formData.isFree === false}
-                    onChange={() => setFormData(prev => ({ ...prev, isFree: false }))}
+                    onChange={() => setFormData(prev => ({ ...prev, isFree: false, fee: prev.fee || "0" }))}
+                    style={{marginRight: '8px'}}
                   />
                   Paid Event
                 </label>
               </div>
               
               {formData.isFree === false && (
-                <input
-                  type="number"
-                  name="fee"
-                  placeholder="Fee Amount (INR)"
-                  value={formData.fee}
-                  onChange={handleInputChange}
-                  min="1"
-                />
+                <div>
+                  <label style={{display: 'block', marginBottom: '5px', fontWeight: 'bold'}}>Fee Amount (INR)</label>
+                  <input
+                    type="number"
+                    name="fee"
+                    placeholder="Enter fee amount"
+                    value={formData.fee || ""}
+                    onChange={handleInputChange}
+                    min="1"
+                    style={{
+                      width: '100%',
+                      padding: '10px',
+                      border: '1px solid #ccc',
+                      borderRadius: '4px',
+                      fontSize: '16px'
+                    }}
+                  />
+                </div>
               )}
             </div>
           </div>
 
           {/* Custom Fields Section */}
-          <div className="form-group">
-            <h3>Custom Registration Fields</h3>
-            <p className="form-hint">Add custom fields to collect additional information from registrants.</p>
+          <div style={{
+            marginTop: '30px', 
+            borderTop: '1px solid #ddd', 
+            paddingTop: '20px'
+          }}>
+            <h3 style={{marginBottom: '10px', fontSize: '18px'}}>Custom Registration Fields</h3>
+            <p style={{marginBottom: '15px', color: '#666', fontSize: '14px'}}>
+              Add custom fields to collect additional information from registrants.
+            </p>
             
-            {formData.customFields.map((field, index) => (
-              <div key={index} className="custom-field-item">
-                <div className="custom-field-row">
-                  <input
-                    type="text"
-                    placeholder="Field Name"
-                    value={field.fieldName || ''}
-                    onChange={(e) => {
-                      const updatedFields = [...formData.customFields];
-                      updatedFields[index].fieldName = e.target.value;
-                      setFormData({...formData, customFields: updatedFields});
-                    }}
-                  />
+            {Array.isArray(formData.customFields) && formData.customFields.map((field, index) => (
+              <div key={index} style={{
+                marginBottom: '20px',
+                padding: '15px',
+                border: '1px solid #ddd',
+                borderRadius: '8px',
+                backgroundColor: '#f9f9f9'
+              }}>
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 1fr',
+                  gap: '15px',
+                  marginBottom: '15px'
+                }}>
+                  <div>
+                    <label style={{display: 'block', marginBottom: '5px', fontWeight: 'bold'}}>Field Name</label>
+                    <input
+                      type="text"
+                      placeholder="Enter field name"
+                      value={field.fieldName || ''}
+                      onChange={(e) => {
+                        const updatedFields = [...formData.customFields];
+                        updatedFields[index].fieldName = e.target.value;
+                        setFormData({...formData, customFields: updatedFields});
+                      }}
+                      style={{
+                        width: '100%',
+                        padding: '10px',
+                        border: '1px solid #ccc',
+                        borderRadius: '4px',
+                        fontSize: '14px'
+                      }}
+                    />
+                  </div>
                   
-                  <select
-                    value={field.fieldType || 'text'}
-                    onChange={(e) => {
-                      const updatedFields = [...formData.customFields];
-                      updatedFields[index].fieldType = e.target.value;
-                      setFormData({...formData, customFields: updatedFields});
-                    }}
-                  >
-                    <option value="text">Text</option>
-                    <option value="email">Email</option>
-                    <option value="number">Number</option>
-                    <option value="date">Date</option>
-                    <option value="select">Dropdown</option>
-                    <option value="checkbox">Checkbox</option>
-                  </select>
+                  <div>
+                    <label style={{display: 'block', marginBottom: '5px', fontWeight: 'bold'}}>Field Type</label>
+                    <select
+                      value={field.fieldType || 'text'}
+                      onChange={(e) => {
+                        const updatedFields = [...formData.customFields];
+                        updatedFields[index].fieldType = e.target.value;
+                        setFormData({...formData, customFields: updatedFields});
+                      }}
+                      style={{
+                        width: '100%',
+                        padding: '10px',
+                        border: '1px solid #ccc',
+                        borderRadius: '4px',
+                        fontSize: '14px',
+                        backgroundColor: '#fff'
+                      }}
+                    >
+                      <option value="text">Text</option>
+                      <option value="email">Email</option>
+                      <option value="number">Number</option>
+                      <option value="date">Date</option>
+                      <option value="select">Dropdown</option>
+                      <option value="checkbox">Checkbox</option>
+                    </select>
+                  </div>
                   
-                  <input
-                    type="text"
-                    placeholder={
-                      field.fieldType === 'date' 
-                        ? "Help text (e.g., 'Select your birth date')" 
-                        : "Placeholder text"
-                    }
-                    value={field.placeholder || ''}
-                    onChange={(e) => {
-                      const updatedFields = [...formData.customFields];
-                      updatedFields[index].placeholder = e.target.value;
-                      setFormData({...formData, customFields: updatedFields});
-                    }}
-                  />
+                  <div>
+                    <label style={{display: 'block', marginBottom: '5px', fontWeight: 'bold'}}>
+                      {field.fieldType === 'date' ? 'Help Text' : 'Placeholder'}
+                    </label>
+                    <input
+                      type="text"
+                      placeholder={
+                        field.fieldType === 'date' 
+                          ? "Help text (e.g., 'Select your birth date')" 
+                          : "Placeholder text"
+                      }
+                      value={field.placeholder || ''}
+                      onChange={(e) => {
+                        const updatedFields = [...formData.customFields];
+                        updatedFields[index].placeholder = e.target.value;
+                        setFormData({...formData, customFields: updatedFields});
+                      }}
+                      style={{
+                        width: '100%',
+                        padding: '10px',
+                        border: '1px solid #ccc',
+                        borderRadius: '4px',
+                        fontSize: '14px'
+                      }}
+                    />
+                  </div>
                   
-                  <div className="field-required-toggle">
-                    <label>
+                  <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
+                    <div style={{display: 'flex', alignItems: 'center'}}>
                       <input
                         type="checkbox"
+                        id={`required-${index}`}
                         checked={field.isRequired || false}
                         onChange={(e) => {
                           const updatedFields = [...formData.customFields];
                           updatedFields[index].isRequired = e.target.checked;
                           setFormData({...formData, customFields: updatedFields});
                         }}
+                        style={{marginRight: '8px'}}
                       />
-                      Required
-                    </label>
+                      <label htmlFor={`required-${index}`} style={{cursor: 'pointer'}}>Required Field</label>
+                    </div>
+                    
+                    <button 
+                      type="button"
+                      onClick={() => {
+                        const updatedFields = formData.customFields.filter((_, i) => i !== index);
+                        setFormData({...formData, customFields: updatedFields});
+                      }}
+                      style={{
+                        backgroundColor: '#dc3545',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '4px',
+                        padding: '8px 12px',
+                        cursor: 'pointer',
+                        fontSize: '14px'
+                      }}
+                    >
+                      Remove Field
+                    </button>
                   </div>
-                  
-                  <button 
-                    type="button" 
-                    className="remove-field-btn"
-                    onClick={() => {
-                      const updatedFields = formData.customFields.filter((_, i) => i !== index);
-                      setFormData({...formData, customFields: updatedFields});
-                    }}
-                  >
-                    Remove
-                  </button>
                 </div>
                 
                 {field.fieldType === 'select' && (
-                  <div className="select-options">
+                  <div style={{
+                    marginTop: '15px',
+                    paddingTop: '15px',
+                    borderTop: '1px dashed #ddd'
+                  }}>
+                    <label style={{display: 'block', marginBottom: '5px', fontWeight: 'bold'}}>Dropdown Options</label>
                     <input
                       type="text"
-                      placeholder="Options (comma separated)"
-                      value={field.options ? field.options.join(', ') : ''}
+                      placeholder="Enter options separated by commas"
+                      value={Array.isArray(field.options) ? field.options.join(', ') : (field.options || '')}
                       onChange={(e) => {
                         const updatedFields = [...formData.customFields];
-                        updatedFields[index].options = e.target.value.split(',').map(opt => opt.trim());
+                        updatedFields[index].options = e.target.value.split(',').map(opt => opt.trim()).filter(opt => opt !== '');
                         setFormData({...formData, customFields: updatedFields});
+                      }}
+                      style={{
+                        width: '100%',
+                        padding: '10px',
+                        border: '1px solid #ccc',
+                        borderRadius: '4px',
+                        fontSize: '14px'
                       }}
                     />
                   </div>
@@ -694,8 +955,7 @@ export default function Admin() {
             ))}
             
             <button 
-              type="button" 
-              className="add-field-btn"
+              type="button"
               onClick={() => {
                 const newField = { 
                   fieldName: '', 
@@ -706,18 +966,63 @@ export default function Admin() {
                 };
                 setFormData({
                   ...formData, 
-                  customFields: [...formData.customFields, newField]
+                  customFields: [...(formData.customFields || []), newField]
                 });
+              }}
+              style={{
+                backgroundColor: '#28a745',
+                color: 'white',
+                border: 'none',
+                borderRadius: '4px',
+                padding: '10px 15px',
+                cursor: 'pointer',
+                fontSize: '14px',
+                fontWeight: 'bold',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto'
               }}
             >
               + Add Custom Field
             </button>
           </div>
           
-          <div className="form-actions">
-            <button type="submit">{editingEvent ? "Update" : "Create"}</button>
+          <div style={{
+            marginTop: '30px', 
+            display: 'flex', 
+            gap: '15px', 
+            justifyContent: 'center'
+          }}>
             <button 
-              type="button" 
+              type="submit"
+              style={{
+                padding: '12px 25px',
+                backgroundColor: editingEvent ? '#007bff' : '#28a745',
+                color: 'white',
+                border: 'none',
+                borderRadius: '5px',
+                fontWeight: 'bold',
+                cursor: 'pointer',
+                fontSize: '16px',
+                minWidth: '150px'
+              }}
+            >
+              {editingEvent ? "Update Event" : "Create Event"}
+            </button>
+            <button 
+              type="button"
+              style={{
+                padding: '12px 25px',
+                backgroundColor: '#6c757d',
+                color: 'white',
+                border: 'none',
+                borderRadius: '5px',
+                fontWeight: 'bold',
+                cursor: 'pointer',
+                fontSize: '16px',
+                minWidth: '150px'
+              }}
               onClick={() => {
                 // Scroll to top of the page
                 window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -728,7 +1033,8 @@ export default function Admin() {
               Cancel
             </button>
           </div>
-        </form>
+          </form>
+        </div>
       )}
 
       {/* Registrations Modal */}
@@ -865,14 +1171,23 @@ export default function Admin() {
             {events.map((event) => (
               <div key={event._id} className="event-card">
                 <h3>{event.name}</h3>
-                <p className="event-date">📅 {new Date(event.date).toLocaleDateString()}</p>
+                <p className="event-date">📅 {event.date ? 
+                  (() => {
+                    try {
+                      return new Date(event.date).toLocaleDateString();
+                    } catch (e) {
+                      console.error("Error formatting date:", e);
+                      return event.date;
+                    }
+                  })() 
+                  : 'No date'}</p>
                 <p>{event.description}</p>
                 <p>📍 Venue: {event.venue}</p>
                 <p>🎟 Seats: {event.seatLimit}</p>
                 <p>
                   {event.isFree ? 
                     "🆓 Free Event" : 
-                    `💰 Paid Event: ₹${event.fee}`
+                    `💰 Paid Event: ₹${event.fee || '0'}`
                   }
                 </p>
                 {event.customFields && event.customFields.length > 0 && (
@@ -901,7 +1216,7 @@ export default function Admin() {
                     onClick={() => handleDownloadExcel(event._id, event.name)}
                     title="Download complete registration data in Excel format"
                   >
-                    � Export to Excel
+                    📊 Export to Excel
                   </button>
                 </div>
               </div>

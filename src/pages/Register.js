@@ -54,6 +54,7 @@ export default function Register() {
       if (isNaN(date.getTime())) return dateString; // Return original if invalid
       
       return date.toLocaleDateString('en-US', {
+        weekday: 'long',
         year: 'numeric',
         month: 'long',
         day: 'numeric'
@@ -62,6 +63,47 @@ export default function Register() {
       return dateString; // Return original on error
     }
   };
+  
+  // Scroll animation with Intersection Observer
+  useEffect(() => {
+    const formGroups = document.querySelectorAll('.form-group');
+    const formSections = document.querySelectorAll('.form-section, .custom-fields-section, .event-details-container');
+    
+    const appearOptions = {
+      threshold: 0.1,
+      rootMargin: "0px 0px -50px 0px"
+    };
+    
+    const appearOnScroll = new IntersectionObserver(function(entries, appearOnScroll) {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) {
+          return;
+        } else {
+          entry.target.classList.add('appear');
+          appearOnScroll.unobserve(entry.target);
+        }
+      });
+    }, appearOptions);
+    
+    // Observe form groups
+    formGroups.forEach(group => {
+      appearOnScroll.observe(group);
+    });
+    
+    // Observe form sections
+    formSections.forEach(section => {
+      appearOnScroll.observe(section);
+    });
+    
+    return () => {
+      formGroups.forEach(group => {
+        appearOnScroll.unobserve(group);
+      });
+      formSections.forEach(section => {
+        appearOnScroll.unobserve(section);
+      });
+    };
+  }, [eventDetails]); // Re-run when event details are loaded
   
   // Validate date input (for date of birth)
   const validateDateInput = (fieldName, value) => {
@@ -281,7 +323,7 @@ export default function Register() {
 
   return (
     <div className="register-container">
-      <h1>
+      <h1 className="staggered-entrance">
         {eventName ? `Register for "${eventName}"` : "Register for Event"}
       </h1>
       
@@ -293,15 +335,10 @@ export default function Register() {
       )}
 
       {eventDetails ? (
-        <div className="event-details-container">
+        <div className="event-details-container staggered-entrance">
           <h3 className="event-heading">Event Details</h3>
           <p className="event-venue">📍 <strong>Venue:</strong> {eventDetails.venue}</p>
-          <p className="event-date">📅 <strong>Date:</strong> {new Date(eventDetails.date).toLocaleDateString("en-US", {
-            weekday: "long",
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-          })}</p>
+          <p className="event-date">📅 <strong>Date:</strong> {formatDate(eventDetails.date)}</p>
           
           {eventDetails.time && (
             <p className="event-time">⏰ <strong>Time:</strong> {eventDetails.time}</p>
@@ -330,7 +367,8 @@ export default function Register() {
       )}
 
       <form className="register-form" onSubmit={handleRegister}>
-        <h3 className="form-heading">Your Information</h3>
+        <div className="form-section">
+          <h3 className="form-heading">Your Information</h3>
         
         <div className="form-group">
           <label htmlFor="name">Full Name</label>
@@ -384,11 +422,12 @@ export default function Register() {
             We'll use this for important updates about the event
           </small>
         </div>
+        </div> {/* End of personal information section */}
 
         {/* Custom Fields Section */}
         {console.log("Rendering custom fields:", eventDetails?.customFields)}
         {eventDetails && eventDetails.customFields && eventDetails.customFields.length > 0 ? (
-          <div className="custom-fields-section">
+          <div className="custom-fields-section form-section">
             <h3 className="form-heading">Additional Information</h3>
             
             {eventDetails.customFields.map((field, index) => (
@@ -458,6 +497,9 @@ export default function Register() {
                       {field.fieldName.toLowerCase().includes('birth') 
                         ? "Please enter your date of birth" 
                         : field.placeholder || `Select a date for ${field.fieldName}`}
+                      {formData.customFieldValues[field.fieldName] && (
+                        <span className="formatted-date"> ({formatDate(formData.customFieldValues[field.fieldName])})</span>
+                      )}
                     </small>
                   </div>
                 )}
@@ -499,31 +541,13 @@ export default function Register() {
             ))}
           </div>
         ) : (
-          <div className="debug-message" style={{
-            margin: '20px 0',
-            padding: '15px',
-            border: '1px solid #ddd',
-            borderRadius: '5px',
-            backgroundColor: '#f9f9f9'
-          }}>
-            <p style={{fontWeight: 'bold', color: '#333'}}>No custom fields found for this event.</p>
-            <details>
-              <summary style={{cursor: 'pointer', color: 'blue'}}>Show debug info</summary>
-              <pre style={{
-                backgroundColor: '#eee',
-                padding: '10px',
-                borderRadius: '5px',
-                overflow: 'auto'
-              }}>{JSON.stringify({
-                eventId: eventId,
-                hasEventDetails: !!eventDetails,
-                hasCustomFields: !!(eventDetails && eventDetails.customFields),
-                customFieldsLength: eventDetails?.customFields?.length || 0,
-                customFields: eventDetails?.customFields || []
-              }, null, 2)}</pre>
-            </details>
+          <div className="no-custom-fields">
+            <p>No additional information required for this event.</p>
           </div>
         )}
+        
+        {/* Submit button section */}
+        <div className="form-section submit-section">
 
         <button
           type="submit"
@@ -574,6 +598,7 @@ export default function Register() {
               "Please fill in all required fields to continue"}
           </small>
         )}
+        </div> {/* End of submit section */}
       </form>
 
       <p className="back-link">

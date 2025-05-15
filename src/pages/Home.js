@@ -40,7 +40,7 @@ const Home = () => {
 
   return (
     <div className="home-container">
-      <header className="home-header">
+      <header className="home-header staggered-entrance">
         {/* <br/> */}
         <h1>🎉 Welcome to Yellowmatics Events</h1>
         <p>Discover and join our exciting upcoming events!</p>
@@ -48,15 +48,19 @@ const Home = () => {
 
       {isLoading ? (
         <div className="loading-container">
-          <div className="spinner-circular"></div>
+          <div className="loading-dots">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
           <p>Loading events...</p>
         </div>
       ) : events.length === 0 ? (
         <p className="no-events">No events available right now. Check back soon!</p>
       ) : (
-        <section className="events-section">
+        <section className="events-section staggered-entrance">
           <h2>📅 Event Lineup</h2>
-          <div className="events-list">
+          <div className="events-list animate-gpu">
             {events.map((event, index) => {
               const eventDate = new Date(event.date);
               const today = new Date().setHours(0, 0, 0, 0);
@@ -66,7 +70,7 @@ const Home = () => {
               return (
                 <div
                   key={event._id}
-                  className={`event-card ${isExpired ? "expired" : ""}`}
+                  className={`event-card ${isExpired ? "expired" : ""} ${index === 0 ? "featured" : ""} animated-card card-entrance`}
                   style={{ animationDelay: `${index * 0.1}s` }} // Staggered animation
                 >
                   <h3>{event.name}</h3>
@@ -96,7 +100,7 @@ const Home = () => {
                       </button>
                     ) : availableSeats > 0 ? (
                       <button
-                        className="register-button"
+                        className="register-button btn-pulse btn-gradient animate-gpu"
                         onClick={() => navigate(`/register/${event._id}`)}
                       >
                         {event.isFree === false ? 

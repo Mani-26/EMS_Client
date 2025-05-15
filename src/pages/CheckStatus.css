@@ -141,18 +141,23 @@ body.dark-mode .status-result h2 {
 }
 
 .status-card {
-  border-radius: 8px;
+  border-radius: 12px;
   overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 body.light-mode .status-card {
   background-color: #f8f9fa;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
 }
 
 body.dark-mode .status-card {
   background-color: #2b2b2b;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+.status-card:hover {
+  transform: translateY(-5px);
 }
 
 .status-header {
@@ -176,21 +181,28 @@ body.dark-mode .status-header {
   border-radius: 20px;
   font-weight: 600;
   font-size: 0.9rem;
+  transition: all 0.3s ease;
 }
 
 .status-badge.completed {
   background-color: rgba(40, 167, 69, 0.1);
   color: #28a745;
+  --pulse-color: 40, 167, 69;
+  box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.4);
 }
 
 .status-badge.pending {
   background-color: rgba(255, 193, 7, 0.1);
   color: #ffc107;
+  --pulse-color: 255, 193, 7;
+  box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.4);
 }
 
 .status-badge.failed {
   background-color: rgba(220, 53, 69, 0.1);
   color: #dc3545;
+  --pulse-color: 220, 53, 69;
+  box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.4);
 }
 
 .status-body {
@@ -274,14 +286,24 @@ body.dark-mode .ticket-qr-container h3 {
   max-width: 200px;
   padding: 0.5rem;
   background-color: white; /* Keep white background for QR code visibility */
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  opacity: 0; /* Start invisible for animation */
 }
 
 body.light-mode .ticket-qr {
   border: 1px solid #eee;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 body.dark-mode .ticket-qr {
   border: 1px solid #444;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.ticket-qr:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
 }
 
 .back-link {
