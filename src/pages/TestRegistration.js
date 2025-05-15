@@ -137,7 +137,11 @@ export default function TestRegistration() {
           }}
           disabled={loading}
         >
-          {loading ? 'Creating...' : 'Create Test Registration'}
+          {loading ? (
+            <span className="btn-loading">
+              <span className="btn-text">Creating Test Registration</span>
+            </span>
+          ) : 'Create Test Registration'}
         </button>
       </form>
       

@@ -1,0 +1,580 @@
+/* Advanced Loading Animations for Yellowmatics EMS */
+
+/* Common loading container styles */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  width: 100%;
+  padding: 2rem;
+  text-align: center;
+}
+
+.loading-container p {
+  margin-top: 1.5rem;
+  font-size: 1.1rem;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  animation: pulse 2s infinite;
+}
+
+body.light-mode .loading-container p {
+  color: var(--text-light);
+}
+
+body.dark-mode .loading-container p {
+  color: var(--text-dark);
+}
+
+/* Pulse animation for text */
+@keyframes pulse {
+  0% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.6;
+  }
+}
+
+/* ===== SPINNER VARIATIONS ===== */
+
+/* 1. Circular Spinner with Gradient */
+.spinner-circular {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  position: relative;
+  animation: rotate 1.5s linear infinite;
+}
+
+.spinner-circular::before {
+  content: "";
+  box-sizing: border-box;
+  position: absolute;
+  inset: 0px;
+  border-radius: 50%;
+  border: 5px solid transparent;
+  background: linear-gradient(45deg, var(--primary-gold) 0%, #ffd700 100%) border-box;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: borderPulse 2s linear infinite;
+}
+
+@keyframes borderPulse {
+  0%, 100% {
+    border-width: 5px;
+  }
+  50% {
+    border-width: 2px;
+  }
+}
+
+/* 2. Dots Loader */
+.spinner-dots {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+
+.spinner-dots span {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+  animation: dots 1.5s infinite ease-in-out;
+}
+
+.spinner-dots span:nth-child(1) {
+  animation-delay: 0s;
+  background-color: var(--primary-gold);
+}
+
+.spinner-dots span:nth-child(2) {
+  animation-delay: 0.2s;
+  background-color: var(--primary-gold);
+}
+
+.spinner-dots span:nth-child(3) {
+  animation-delay: 0.4s;
+  background-color: var(--primary-gold);
+}
+
+@keyframes dots {
+  0%, 100% {
+    transform: scale(0.2);
+    opacity: 0.2;
+  }
+  50% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* 3. Ripple Effect */
+.spinner-ripple {
+  width: 60px;
+  height: 60px;
+  position: relative;
+}
+
+.spinner-ripple div {
+  position: absolute;
+  border: 4px solid var(--primary-gold);
+  border-radius: 50%;
+  animation: ripple 1.5s ease-out infinite;
+  opacity: 0;
+}
+
+.spinner-ripple div:nth-child(2) {
+  animation-delay: 0.5s;
+}
+
+@keyframes ripple {
+  0% {
+    top: 28px;
+    left: 28px;
+    width: 0;
+    height: 0;
+    opacity: 1;
+  }
+  100% {
+    top: -1px;
+    left: -1px;
+    width: 58px;
+    height: 58px;
+    opacity: 0;
+  }
+}
+
+/* 4. Progress Bar */
+.spinner-progress {
+  width: 200px;
+  height: 6px;
+  background-color: rgba(176, 141, 87, 0.2);
+  border-radius: 10px;
+  overflow: hidden;
+  position: relative;
+}
+
+.spinner-progress::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 30%;
+  background-color: var(--primary-gold);
+  border-radius: 10px;
+  animation: progress 1.5s infinite ease-in-out;
+}
+
+@keyframes progress {
+  0% {
+    left: -30%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+/* 5. Rotating Square */
+.spinner-square {
+  width: 40px;
+  height: 40px;
+  background-color: var(--primary-gold);
+  animation: rotateSquare 2s infinite ease;
+}
+
+@keyframes rotateSquare {
+  0% {
+    transform: perspective(120px) rotateX(0deg) rotateY(0deg);
+  }
+  25% {
+    transform: perspective(120px) rotateX(-180.1deg) rotateY(0deg);
+  }
+  50% {
+    transform: perspective(120px) rotateX(-180deg) rotateY(-179.9deg);
+  }
+  75% {
+    transform: perspective(120px) rotateX(0deg) rotateY(-179.9deg);
+  }
+  100% {
+    transform: perspective(120px) rotateX(0deg) rotateY(0deg);
+  }
+}
+
+/* 6. Dual Ring */
+.spinner-dual-ring {
+  display: inline-block;
+  width: 60px;
+  height: 60px;
+}
+
+.spinner-dual-ring:after {
+  content: " ";
+  display: block;
+  width: 48px;
+  height: 48px;
+  margin: 8px;
+  border-radius: 50%;
+  border: 5px solid var(--primary-gold);
+  border-color: var(--primary-gold) transparent var(--primary-gold) transparent;
+  animation: dual-ring 1.2s linear infinite;
+}
+
+@keyframes dual-ring {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* 7. Ellipsis Animation */
+.spinner-ellipsis {
+  display: inline-block;
+  position: relative;
+  width: 80px;
+  height: 30px;
+}
+
+.spinner-ellipsis div {
+  position: absolute;
+  top: 10px;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: var(--primary-gold);
+  animation-timing-function: cubic-bezier(0, 1, 1, 0);
+}
+
+.spinner-ellipsis div:nth-child(1) {
+  left: 8px;
+  animation: ellipsis1 0.6s infinite;
+}
+
+.spinner-ellipsis div:nth-child(2) {
+  left: 8px;
+  animation: ellipsis2 0.6s infinite;
+}
+
+.spinner-ellipsis div:nth-child(3) {
+  left: 32px;
+  animation: ellipsis2 0.6s infinite;
+}
+
+.spinner-ellipsis div:nth-child(4) {
+  left: 56px;
+  animation: ellipsis3 0.6s infinite;
+}
+
+@keyframes ellipsis1 {
+  0% {
+    transform: scale(0);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes ellipsis2 {
+  0% {
+    transform: translate(0, 0);
+  }
+  100% {
+    transform: translate(24px, 0);
+  }
+}
+
+@keyframes ellipsis3 {
+  0% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(0);
+  }
+}
+
+/* 8. Shimmer Effect for Cards and Content */
+.shimmer {
+  background: #f6f7f8;
+  background-image: linear-gradient(
+    to right,
+    #f6f7f8 0%,
+    #edeef1 20%,
+    #f6f7f8 40%,
+    #f6f7f8 100%
+  );
+  background-repeat: no-repeat;
+  background-size: 800px 100%;
+  display: inline-block;
+  position: relative;
+  animation: shimmer 1.5s infinite linear;
+}
+
+body.dark-mode .shimmer {
+  background: #333;
+  background-image: linear-gradient(
+    to right,
+    #333 0%,
+    #444 20%,
+    #333 40%,
+    #333 100%
+  );
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -468px 0;
+  }
+  100% {
+    background-position: 468px 0;
+  }
+}
+
+/* Shimmer placeholders */
+.shimmer-card {
+  height: 200px;
+  width: 100%;
+  border-radius: 8px;
+}
+
+.shimmer-text {
+  height: 15px;
+  width: 100%;
+  margin: 10px 0;
+  border-radius: 3px;
+}
+
+.shimmer-text.short {
+  width: 60%;
+}
+
+/* 9. Spinner with Text Animation */
+.spinner-with-text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.spinner-with-text .text {
+  margin-top: 15px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  overflow: hidden;
+  white-space: nowrap;
+  border-right: 3px solid var(--primary-gold);
+  animation: typing 3.5s steps(40, end) infinite, blink-caret 0.75s step-end infinite;
+}
+
+@keyframes typing {
+  0%, 100% {
+    width: 0;
+  }
+  50%, 90% {
+    width: 100%;
+  }
+}
+
+@keyframes blink-caret {
+  from, to {
+    border-color: transparent;
+  }
+  50% {
+    border-color: var(--primary-gold);
+  }
+}
+
+/* 10. Rotating Circle with Gradient */
+.spinner-circle-gradient {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, transparent 0%, var(--primary-gold) 100%);
+  animation: rotate 1s linear infinite;
+  position: relative;
+}
+
+.spinner-circle-gradient::after {
+  content: '';
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  right: 10px;
+  bottom: 10px;
+  background: var(--bg-light);
+  border-radius: 50%;
+}
+
+body.dark-mode .spinner-circle-gradient::after {
+  background: var(--bg-dark);
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Button Loading States */
+.btn-loading {
+  position: relative;
+  pointer-events: none;
+}
+
+.btn-loading .btn-text {
+  visibility: hidden;
+}
+
+.btn-loading::after {
+  content: "";
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  top: calc(50% - 8px);
+  left: calc(50% - 8px);
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.7);
+  border-top-color: #ffffff;
+  animation: rotate 0.8s linear infinite;
+}
+
+/* Skeleton Loading for Cards */
+.skeleton-card {
+  background: var(--bg-light);
+  border-radius: 15px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow-light);
+  overflow: hidden;
+  position: relative;
+}
+
+body.dark-mode .skeleton-card {
+  background: var(--bg-dark);
+  box-shadow: var(--shadow-dark);
+}
+
+.skeleton-card::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  transform: translateX(-100%);
+  background-image: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0,
+    rgba(255, 255, 255, 0.2) 20%,
+    rgba(255, 255, 255, 0.5) 60%,
+    rgba(255, 255, 255, 0)
+  );
+  animation: shimmer-card 2s infinite;
+}
+
+body.dark-mode .skeleton-card::after {
+  background-image: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0,
+    rgba(255, 255, 255, 0.1) 20%,
+    rgba(255, 255, 255, 0.2) 60%,
+    rgba(255, 255, 255, 0)
+  );
+}
+
+@keyframes shimmer-card {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.skeleton-title {
+  height: 24px;
+  width: 80%;
+  margin-bottom: 15px;
+  background: #e0e0e0;
+  border-radius: 4px;
+}
+
+body.dark-mode .skeleton-title {
+  background: #444;
+}
+
+.skeleton-text {
+  height: 12px;
+  width: 100%;
+  margin-bottom: 10px;
+  background: #e0e0e0;
+  border-radius: 4px;
+}
+
+body.dark-mode .skeleton-text {
+  background: #444;
+}
+
+.skeleton-text:last-child {
+  width: 60%;
+}
+
+/* Page transition loading */
+.page-transition-loader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(to right, transparent, var(--primary-gold), transparent);
+  z-index: 9999;
+  animation: pageTransition 1.5s ease-in-out infinite;
+}
+
+@keyframes pageTransition {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Fullscreen loading overlay */
+.fullscreen-loader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.9);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  backdrop-filter: blur(5px);
+}
+
+body.dark-mode .fullscreen-loader {
+  background: rgba(0, 0, 0, 0.8);
+}
+
+.fullscreen-loader-content {
+  text-align: center;
+}
+
+.fullscreen-loader-icon {
+  width: 80px;
+  height: 80px;
+  margin-bottom: 20px;
+}

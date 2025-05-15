@@ -1,20 +1,82 @@
 .admin-header {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
-  text-align: center;
+  justify-content: space-between;
+  padding: 0 2rem;
+  margin-bottom: 1.5rem;
+  position: relative;
 }
 
 .admin-header h1 {
   font-size: 2rem;
   white-space: nowrap;
-  width: 100%;
   text-align: center;
+  margin: 0;
+}
+
+.logout-button {
+  background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.6rem 1.2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.logout-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: all 0.5s;
+}
+
+.logout-button:hover::before {
+  left: 100%;
+}
+
+.logout-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+  background: linear-gradient(135deg, #c82333 0%, #bd2130 100%);
+}
+
+.logout-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.logout-icon {
+  font-size: 1.2rem;
 }
 
 @media (max-width: 768px) {
+  .admin-header {
+    flex-direction: column;
+    gap: 1rem;
+    padding: 0 1rem;
+  }
+  
   .admin-header h1 {
     font-size: 1.5rem;
+  }
+  
+  .logout-button {
+    font-size: 0.9rem;
+    padding: 0.5rem 1rem;
   }
 }
 
@@ -462,4 +524,137 @@ button.download-link {
   outline: none;
   border: none;
   width: 100%;
+}
+
+/* Custom Fields Styling */
+.custom-field-item {
+  background: rgba(0, 0, 0, 0.03);
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 15px;
+  border: 1px solid #ddd;
+}
+
+body.dark-mode .custom-field-item {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: #444;
+}
+
+.custom-field-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.custom-field-row input[type="text"],
+.custom-field-row select {
+  flex: 1;
+  min-width: 120px;
+}
+
+.field-required-toggle {
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.field-required-toggle label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+}
+
+.remove-field-btn {
+  background: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 5px 10px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: all 0.2s;
+}
+
+.remove-field-btn:hover {
+  background: #c82333;
+}
+
+.add-field-btn {
+  background: #28a745;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 15px;
+  cursor: pointer;
+  margin-top: 10px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.add-field-btn:hover {
+  background: #218838;
+  transform: translateY(-2px);
+}
+
+.select-options {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed #ddd;
+}
+
+body.dark-mode .select-options {
+  border-top-color: #444;
+}
+
+.custom-fields-indicator {
+  background-color: rgba(0, 123, 255, 0.1);
+  border-left: 3px solid #007bff;
+  padding: 5px 10px;
+  margin-top: 10px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+body.dark-mode .custom-fields-indicator {
+  background-color: rgba(0, 123, 255, 0.2);
+}
+
+/* Custom fields in registration table */
+.custom-fields-data {
+  max-height: 100px;
+  overflow-y: auto;
+  font-size: 0.85rem;
+}
+
+.custom-field-entry {
+  padding: 3px 0;
+  border-bottom: 1px dashed #eee;
+}
+
+.custom-field-entry:last-child {
+  border-bottom: none;
+}
+
+body.dark-mode .custom-field-entry {
+  border-bottom-color: #444;
+}
+
+.no-data {
+  color: #999;
+  font-style: italic;
+  font-size: 0.85rem;
+}
+
+@media (max-width: 768px) {
+  .custom-field-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .custom-field-row > * {
+    width: 100%;
+  }
 }

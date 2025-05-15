@@ -55,8 +55,10 @@ const PaymentSuccess = () => {
   if (loading) {
     return (
       <div className="loading-container">
-        <div className="spinner"></div>
-        <p>Loading your ticket information...</p>
+        <div className="spinner-with-text">
+          <div className="spinner-dual-ring"></div>
+          <div className="text">Loading your ticket information...</div>
+        </div>
       </div>
     );
   }

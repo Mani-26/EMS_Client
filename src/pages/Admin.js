@@ -15,6 +15,7 @@ export default function Admin() {
     seatLimit: "",
     isFree: true,
     fee: "",
+    customFields: []
   });
   
   // Function to handle logout
@@ -38,6 +39,7 @@ export default function Admin() {
   const [registrations, setRegistrations] = useState([]);
   const [showRegistrations, setShowRegistrations] = useState(false);
   const [selectedEventName, setSelectedEventName] = useState("");
+  // const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     // Check both sessionStorage and localStorage for the token
@@ -278,7 +280,51 @@ export default function Admin() {
       return;
     }
 
+    // Validate custom fields
+    if (formData.customFields && formData.customFields.length > 0) {
+      // Check for empty field names
+      const emptyFieldNames = formData.customFields.some(field => !field.fieldName || field.fieldName.trim() === '');
+      if (emptyFieldNames) {
+        Swal.fire({
+          icon: "warning",
+          title: "Invalid Custom Fields",
+          text: "All custom fields must have a name.",
+        });
+        return;
+      }
+      
+      // Check for duplicate field names
+      const fieldNames = formData.customFields.map(field => field.fieldName);
+      const hasDuplicates = fieldNames.some((name, index) => fieldNames.indexOf(name) !== index);
+      if (hasDuplicates) {
+        Swal.fire({
+          icon: "warning",
+          title: "Duplicate Field Names",
+          text: "Custom field names must be unique.",
+        });
+        return;
+      }
+      
+      // Validate select fields have options
+      const selectFieldsWithoutOptions = formData.customFields
+        .filter(field => field.fieldType === 'select')
+        .some(field => !field.options || field.options.length === 0);
+        
+      if (selectFieldsWithoutOptions) {
+        Swal.fire({
+          icon: "warning",
+          title: "Missing Options",
+          text: "Dropdown fields must have at least one option.",
+        });
+        return;
+      }
+    }
+    
     try {
+      // Log the form data being sent
+      console.log("Saving event with data:", formData);
+      console.log("Custom fields:", formData.customFields);
+      
       if (editingEvent) {
         await axios.put(
           `${process.env.REACT_APP_API_URL}/api/events/${editingEvent._id}`,
@@ -301,10 +347,25 @@ export default function Admin() {
           showConfirmButton: false,
         });
       }
-      setFormData({ name: "", date: "", description: "", venue: "", seatLimit: "", isFree: true, fee: "" });
-      setEditingEvent(null);
-      setShowForm(false);
-      fetchEvents();
+      // Scroll to top of the page
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      
+      // Reset form and fetch events after a slight delay
+      setTimeout(() => {
+        setFormData({ 
+          name: "", 
+          date: "", 
+          description: "", 
+          venue: "", 
+          seatLimit: "", 
+          isFree: true, 
+          fee: "",
+          customFields: []
+        });
+        setEditingEvent(null);
+        setShowForm(false);
+        fetchEvents();
+      }, 300);
     } catch (error) {
       Swal.fire({
         icon: "error",
@@ -347,27 +408,41 @@ export default function Admin() {
   };
 
   const handleEditEvent = (event) => {
-    setEditingEvent(event);
-    setFormData({
-      name: event.name,
-      date: event.date.split("T")[0],
-      description: event.description,
-      venue: event.venue,
-      seatLimit: event.seatLimit,
-      isFree: event.isFree !== undefined ? event.isFree : true,
-      fee: event.fee || "",
-    });
-    setShowForm(true);
+    // Scroll to top of the page
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    
+    // Set form data after a slight delay to ensure scroll completes
+    setTimeout(() => {
+      setEditingEvent(event);
+      setFormData({
+        name: event.name,
+        date: event.date.split("T")[0],
+        description: event.description,
+        venue: event.venue,
+        seatLimit: event.seatLimit,
+        isFree: event.isFree !== undefined ? event.isFree : true,
+        fee: event.fee || "",
+        customFields: event.customFields || []
+      });
+      setShowForm(true);
+    }, 300);
   };
 
   const fetchRegistrations = async (eventId, eventName) => {
     try {
+      // Scroll to top of the page
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      
       const res = await axios.get(
         `${process.env.REACT_APP_API_URL}/api/events/${eventId}/registrations`
       );
-      setRegistrations(res.data);
-      setSelectedEventName(eventName);
-      setShowRegistrations(true);
+      
+      // Set data after a slight delay to ensure scroll completes
+      setTimeout(() => {
+        setRegistrations(res.data);
+        setSelectedEventName(eventName);
+        setShowRegistrations(true);
+      }, 300);
     } catch (error) {
       Swal.fire({
         icon: "error",
@@ -441,9 +516,11 @@ export default function Admin() {
 
   return (
     <div className="admin-container">
-      <br />
       <div className="admin-header">
         <h1>🎯 Admin Dashboard</h1>
+        <button className="logout-button" onClick={handleLogout}>
+          <span className="logout-icon">🚪</span> Logout
+        </button>
       </div>
 
       {/* Event Form */}
@@ -521,9 +598,133 @@ export default function Admin() {
               )}
             </div>
           </div>
+
+          {/* Custom Fields Section */}
+          <div className="form-group">
+            <h3>Custom Registration Fields</h3>
+            <p className="form-hint">Add custom fields to collect additional information from registrants.</p>
+            
+            {formData.customFields.map((field, index) => (
+              <div key={index} className="custom-field-item">
+                <div className="custom-field-row">
+                  <input
+                    type="text"
+                    placeholder="Field Name"
+                    value={field.fieldName || ''}
+                    onChange={(e) => {
+                      const updatedFields = [...formData.customFields];
+                      updatedFields[index].fieldName = e.target.value;
+                      setFormData({...formData, customFields: updatedFields});
+                    }}
+                  />
+                  
+                  <select
+                    value={field.fieldType || 'text'}
+                    onChange={(e) => {
+                      const updatedFields = [...formData.customFields];
+                      updatedFields[index].fieldType = e.target.value;
+                      setFormData({...formData, customFields: updatedFields});
+                    }}
+                  >
+                    <option value="text">Text</option>
+                    <option value="email">Email</option>
+                    <option value="number">Number</option>
+                    <option value="date">Date</option>
+                    <option value="select">Dropdown</option>
+                    <option value="checkbox">Checkbox</option>
+                  </select>
+                  
+                  <input
+                    type="text"
+                    placeholder={
+                      field.fieldType === 'date' 
+                        ? "Help text (e.g., 'Select your birth date')" 
+                        : "Placeholder text"
+                    }
+                    value={field.placeholder || ''}
+                    onChange={(e) => {
+                      const updatedFields = [...formData.customFields];
+                      updatedFields[index].placeholder = e.target.value;
+                      setFormData({...formData, customFields: updatedFields});
+                    }}
+                  />
+                  
+                  <div className="field-required-toggle">
+                    <label>
+                      <input
+                        type="checkbox"
+                        checked={field.isRequired || false}
+                        onChange={(e) => {
+                          const updatedFields = [...formData.customFields];
+                          updatedFields[index].isRequired = e.target.checked;
+                          setFormData({...formData, customFields: updatedFields});
+                        }}
+                      />
+                      Required
+                    </label>
+                  </div>
+                  
+                  <button 
+                    type="button" 
+                    className="remove-field-btn"
+                    onClick={() => {
+                      const updatedFields = formData.customFields.filter((_, i) => i !== index);
+                      setFormData({...formData, customFields: updatedFields});
+                    }}
+                  >
+                    Remove
+                  </button>
+                </div>
+                
+                {field.fieldType === 'select' && (
+                  <div className="select-options">
+                    <input
+                      type="text"
+                      placeholder="Options (comma separated)"
+                      value={field.options ? field.options.join(', ') : ''}
+                      onChange={(e) => {
+                        const updatedFields = [...formData.customFields];
+                        updatedFields[index].options = e.target.value.split(',').map(opt => opt.trim());
+                        setFormData({...formData, customFields: updatedFields});
+                      }}
+                    />
+                  </div>
+                )}
+              </div>
+            ))}
+            
+            <button 
+              type="button" 
+              className="add-field-btn"
+              onClick={() => {
+                const newField = { 
+                  fieldName: '', 
+                  fieldType: 'text', 
+                  isRequired: false,
+                  placeholder: '',
+                  options: []
+                };
+                setFormData({
+                  ...formData, 
+                  customFields: [...formData.customFields, newField]
+                });
+              }}
+            >
+              + Add Custom Field
+            </button>
+          </div>
+          
           <div className="form-actions">
             <button type="submit">{editingEvent ? "Update" : "Create"}</button>
-            <button type="button" onClick={() => setShowForm(false)}>
+            <button 
+              type="button" 
+              onClick={() => {
+                // Scroll to top of the page
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                // Close the form after a slight delay
+                setTimeout(() => setShowForm(false), 300);
+              }}
+            >
               Cancel
             </button>
           </div>
@@ -544,6 +745,7 @@ export default function Admin() {
                       <th>Email</th>
                       <th>Phone</th>
                       <th>Ticket ID</th>
+                      <th>Custom Fields</th>
                       <th>Payment Status</th>
                       <th>Payment Screenshot</th>
                     </tr>
@@ -555,6 +757,34 @@ export default function Admin() {
                         <td>{user.email}</td>
                         <td>{user.phone || 'N/A'}</td>
                         <td>{user.ticketId || 'N/A'}</td>
+                        <td>
+                          {user.customFieldValues && Object.keys(user.customFieldValues).length > 0 ? (
+                            <div className="custom-fields-data">
+                              {Object.entries(user.customFieldValues).map(([key, value], i) => {
+                                // Check if the value is a date string (YYYY-MM-DD format)
+                                const isDateValue = value && typeof value === 'string' && 
+                                  /^\d{4}-\d{2}-\d{2}$/.test(value);
+                                
+                                // Format date values nicely
+                                const displayValue = isDateValue 
+                                  ? new Date(value).toLocaleDateString('en-US', {
+                                      year: 'numeric', 
+                                      month: 'long', 
+                                      day: 'numeric'
+                                    })
+                                  : value.toString();
+                                
+                                return (
+                                  <div key={i} className="custom-field-entry">
+                                    <strong>{key}:</strong> {displayValue}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          ) : (
+                            <span className="no-data">No custom data</span>
+                          )}
+                        </td>
                         <td>
                           <span className={`status-badge ${user.paymentStatus}`}>
                             {user.paymentStatus === 'completed' ? '✅ Completed' : '⏳ Pending'}
@@ -610,7 +840,17 @@ export default function Admin() {
             ) : (
               <p>No registrations yet.</p>
             )}
-            <button className="close-modal-btn" onClick={() => setShowRegistrations(false)}>Close</button>
+            <button 
+              className="close-modal-btn" 
+              onClick={() => {
+                // Scroll to top of the page
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                // Close the registrations view after a slight delay
+                setTimeout(() => setShowRegistrations(false), 300);
+              }}
+            >
+              Back to Events
+            </button>
           </div>
         </div>
       )}
@@ -635,6 +875,11 @@ export default function Admin() {
                     `💰 Paid Event: ₹${event.fee}`
                   }
                 </p>
+                {event.customFields && event.customFields.length > 0 && (
+                  <p className="custom-fields-indicator">
+                    📋 Custom Fields: {event.customFields.length}
+                  </p>
+                )}
                 <div className="event-actions">
                   <button
                     className="view-button"

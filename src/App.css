@@ -16,6 +16,14 @@
   --input-bg-dark: #2b2b2b;
   --border-light: #e0e0e0;
   --border-dark: #404040;
+  
+  /* Animation variables */
+  --transition-fast: all 0.2s ease;
+  --transition-medium: all 0.3s ease;
+  --transition-slow: all 0.5s ease;
+  --animation-duration-short: 0.3s;
+  --animation-duration-medium: 0.5s;
+  --animation-duration-long: 0.8s;
 }
 
 body {
@@ -131,55 +139,154 @@ body.dark-mode .input-field {
   background: linear-gradient(135deg, #28a745 0%, #218838 100%);
 }
 
+.register-button {
+  position: relative;
+  overflow: hidden;
+}
+
+.register-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: all 0.5s;
+}
+
 .register-button:hover {
   background: linear-gradient(135deg, #218838 0%, #1d7732 100%);
-  transform: translateY(-2px);
+  transform: translateY(-3px);
+  box-shadow: 0 7px 14px rgba(0, 0, 0, 0.2);
+}
+
+.register-button:hover::before {
+  left: 100%;
+}
+
+.register-button:active {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
 }
 
 .register-button:disabled {
   background: #d0d0d0;
   cursor: not-allowed;
   transform: none;
+  box-shadow: none;
 }
 
 .edit-button {
   background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
   margin: 0.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.edit-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: all 0.5s;
 }
 
 .edit-button:hover {
   background: linear-gradient(135deg, #e0a800 0%, #cc9400 100%);
-  transform: translateY(-2px);
+  transform: translateY(-3px);
+  box-shadow: 0 7px 14px rgba(0, 0, 0, 0.2);
+}
+
+.edit-button:hover::before {
+  left: 100%;
 }
 
 .view-button {
   background: linear-gradient(135deg, #1bed4f 0%, #1fb444 100%);
   margin: 0.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.view-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: all 0.5s;
 }
 
 .view-button:hover {
   background: linear-gradient(135deg, #1fb444 0%, #1a9b3a 100%);
-  transform: translateY(-2px);
+  transform: translateY(-3px);
+  box-shadow: 0 7px 14px rgba(0, 0, 0, 0.2);
+}
+
+.view-button:hover::before {
+  left: 100%;
 }
 
 .download-button {
   background: linear-gradient(135deg, #3604fc 0%, #220985 100%);
   margin: 0.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.download-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: all 0.5s;
 }
 
 .download-button:hover {
   background: linear-gradient(135deg, #220985 0%, #1a076b 100%);
-  transform: translateY(-2px);
+  transform: translateY(-3px);
+  box-shadow: 0 7px 14px rgba(0, 0, 0, 0.2);
+}
+
+.download-button:hover::before {
+  left: 100%;
 }
 
 .delete-button {
   background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
   margin: 0.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.delete-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: all 0.5s;
 }
 
 .delete-button:hover {
   background: linear-gradient(135deg, #c82333 0%, #b31e2c 100%);
-  transform: translateY(-2px);
+  transform: translateY(-3px);
+  box-shadow: 0 7px 14px rgba(0, 0, 0, 0.2);
+}
+
+.delete-button:hover::before {
+  left: 100%;
 }
 
 /* Navbar.css */
@@ -320,15 +427,18 @@ body.dark-mode .event-card {
 }
 
 .event-card:hover {
-  transform: translateY(-5px);
+  transform: translateY(-8px) scale(1.02);
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 body.light-mode .event-card:hover {
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+  border-color: var(--primary-gold);
 }
 
 body.dark-mode .event-card:hover {
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+  border-color: var(--primary-gold);
 }
 
 .event-date {
@@ -477,8 +587,13 @@ body.dark-mode .floating-button {
   box-shadow: var(--shadow-dark);
 }
 
+.floating-button {
+  animation: pulse 2s infinite;
+}
+
 .floating-button:hover {
-  transform: translateY(-3px);
+  transform: translateY(-3px) scale(1.1);
+  animation: none;
 }
 
 body.light-mode .floating-button:hover {
@@ -487,6 +602,21 @@ body.light-mode .floating-button:hover {
 
 body.dark-mode .floating-button:hover {
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  }
 }
 
 /* Modal Styles */
@@ -501,7 +631,17 @@ body.dark-mode .floating-button:hover {
   justify-content: center;
   align-items: center;
   z-index: 1000; /* High z-index to appear on top */
-  animation: fadeIn 0.3s ease-in-out; /* Kept from Admin.css */
+  animation: fadeIn 0.4s ease-in-out;
+  backdrop-filter: blur(5px);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .modal-content {
@@ -511,6 +651,19 @@ body.dark-mode .floating-button:hover {
   max-width: 90%;
   max-height: 80vh;
   overflow-y: auto;
+  animation: modalSlideIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+@keyframes modalSlideIn {
+  from {
+    transform: translateY(50px) scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
 }
 
 body.light-mode .modal-content {

@@ -480,7 +480,10 @@ const PaymentForm = () => {
     return (
       <div className="payment-container">
         <div className="loading-container">
-          <div className="spinner"></div>
+          <div className="spinner-ripple">
+            <div></div>
+            <div></div>
+          </div>
           <p>Loading payment details...</p>
         </div>
       </div>

@@ -6,7 +6,12 @@ import "./Register.css"; // Custom styles for Register page
 import "../styles/sweetalert-dark.css"; // Import SweetAlert dark mode styles
 
 export default function Register() {
-  const [formData, setFormData] = useState({ name: "", email: "", phone: "" });
+  const [formData, setFormData] = useState({ 
+    name: "", 
+    email: "", 
+    phone: "",
+    customFieldValues: {} 
+  });
   const [availableSeats, setAvailableSeats] = useState(null);
   const [eventName, setEventName] = useState(""); // Added to display event name
   const [eventDetails, setEventDetails] = useState(null); // Store all event details
@@ -16,11 +21,16 @@ export default function Register() {
 
   // Fetch event details
   useEffect(() => {
+    console.log("Event ID from URL:", eventId);
+    
     const fetchEventDetails = async () => {
       try {
+        console.log("Fetching event details for ID:", eventId);
         const res = await axios.get(
           `${process.env.REACT_APP_API_URL}/api/events/${eventId}`
         );
+        console.log("Event details from API:", res.data);
+        console.log("Custom fields:", res.data.customFields);
         setEventName(res.data.name);
         setEventDetails(res.data);
         setAvailableSeats(res.data.seatLimit - res.data.registeredUsers);
@@ -36,10 +46,98 @@ export default function Register() {
     fetchEventDetails();
   }, [eventId]);
 
+  // Format date for display
+  const formatDate = (dateString) => {
+    if (!dateString) return '';
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return dateString; // Return original if invalid
+      
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+    } catch (error) {
+      return dateString; // Return original on error
+    }
+  };
+  
+  // Validate date input (for date of birth)
+  const validateDateInput = (fieldName, value) => {
+    // If it's a date of birth field
+    if (fieldName.toLowerCase().includes('birth')) {
+      const birthDate = new Date(value);
+      const today = new Date();
+      
+      // Check if date is valid
+      if (isNaN(birthDate.getTime())) {
+        return false;
+      }
+      
+      // Check if date is in the future
+      if (birthDate > today) {
+        return false;
+      }
+      
+      // Check if person is too old (e.g., over 120 years)
+      const maxAge = 120;
+      const minDate = new Date();
+      minDate.setFullYear(today.getFullYear() - maxAge);
+      if (birthDate < minDate) {
+        return false;
+      }
+      
+      return true;
+    }
+    
+    // For other date fields, just check if it's a valid date
+    return !isNaN(new Date(value).getTime());
+  };
+
   // Handle form input changes
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    const { name, value, type, checked } = e.target;
+    
+    // Check if this is a custom field
+    if (name.startsWith('custom_')) {
+      const fieldName = name.replace('custom_', '');
+      
+      // Handle different input types
+      let fieldValue = type === 'checkbox' ? checked : value;
+      
+      // For date fields, validate the input
+      if (type === 'date' && value) {
+        // If date is invalid, show an error
+        if (!validateDateInput(fieldName, value)) {
+          Swal.fire({
+            icon: "warning",
+            title: "Invalid Date",
+            text: fieldName.toLowerCase().includes('birth') 
+              ? "Please enter a valid date of birth" 
+              : "Please enter a valid date",
+            confirmButtonColor: "#007bff",
+          });
+          return;
+        }
+        
+        // Store date in ISO format (YYYY-MM-DD)
+        fieldValue = value; // Already in YYYY-MM-DD format from input
+        
+        console.log(`Date field ${fieldName} value:`, fieldValue);
+      }
+      
+      setFormData((prev) => ({
+        ...prev,
+        customFieldValues: {
+          ...prev.customFieldValues,
+          [fieldName]: fieldValue
+        }
+      }));
+    } else {
+      // Regular field
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
   };
 
   // Handle registration
@@ -55,6 +153,31 @@ export default function Register() {
         confirmButtonColor: "#007bff",
       });
       return;
+    }
+    
+    // Validate required custom fields
+    if (eventDetails && eventDetails.customFields) {
+      const missingRequiredFields = eventDetails.customFields
+        .filter(field => field.isRequired)
+        .filter(field => {
+          const value = formData.customFieldValues[field.fieldName];
+          // For non-string values like checkboxes (boolean)
+          if (typeof value !== 'string') {
+            return value === undefined || value === null || value === false;
+          }
+          // For string values
+          return !value || value.trim() === '';
+        });
+        
+      if (missingRequiredFields.length > 0) {
+        Swal.fire({
+          icon: "warning",
+          title: "Missing Information",
+          text: `Please fill in all required fields: ${missingRequiredFields.map(f => f.fieldName).join(', ')}`,
+          confirmButtonColor: "#007bff",
+        });
+        return;
+      }
     }
     
     // Validate phone number (10 digits)
@@ -90,7 +213,13 @@ export default function Register() {
       }
 
       // Debug log
-      console.log("Registering user:", { name, email, phone, eventId });
+      console.log("Registering user:", { 
+        name, 
+        email, 
+        phone, 
+        eventId,
+        customFieldValues: formData.customFieldValues 
+      });
       console.log("API URL:", process.env.REACT_APP_API_URL);
       
       try {
@@ -100,6 +229,7 @@ export default function Register() {
           email,
           phone,
           eventId,
+          customFieldValues: formData.customFieldValues
         });
 
         // Check if this is a paid event that requires payment
@@ -190,8 +320,12 @@ export default function Register() {
         </div>
       ) : (
         <div className="loading-container">
+          <div className="spinner-dots">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
           <p className="seat-info loading">Loading event details...</p>
-          <div className="spinner centered-spinner"></div>
         </div>
       )}
 
@@ -251,13 +385,167 @@ export default function Register() {
           </small>
         </div>
 
+        {/* Custom Fields Section */}
+        {console.log("Rendering custom fields:", eventDetails?.customFields)}
+        {eventDetails && eventDetails.customFields && eventDetails.customFields.length > 0 ? (
+          <div className="custom-fields-section">
+            <h3 className="form-heading">Additional Information</h3>
+            
+            {eventDetails.customFields.map((field, index) => (
+              <div className="form-group" key={index}>
+                <label htmlFor={`custom_${field.fieldName}`}>
+                  {field.fieldName}
+                  {field.isRequired && <span className="required-mark">*</span>}
+                </label>
+                
+                {field.fieldType === 'text' && (
+                  <input
+                    type="text"
+                    id={`custom_${field.fieldName}`}
+                    name={`custom_${field.fieldName}`}
+                    placeholder={field.placeholder || `Enter ${field.fieldName}`}
+                    value={formData.customFieldValues[field.fieldName] || ''}
+                    onChange={handleInputChange}
+                    className="input-field"
+                    disabled={availableSeats === 0 || isLoading}
+                    required={field.isRequired}
+                  />
+                )}
+                
+                {field.fieldType === 'email' && (
+                  <input
+                    type="email"
+                    id={`custom_${field.fieldName}`}
+                    name={`custom_${field.fieldName}`}
+                    placeholder={field.placeholder || `Enter ${field.fieldName}`}
+                    value={formData.customFieldValues[field.fieldName] || ''}
+                    onChange={handleInputChange}
+                    className="input-field"
+                    disabled={availableSeats === 0 || isLoading}
+                    required={field.isRequired}
+                  />
+                )}
+                
+                {field.fieldType === 'number' && (
+                  <input
+                    type="number"
+                    id={`custom_${field.fieldName}`}
+                    name={`custom_${field.fieldName}`}
+                    placeholder={field.placeholder || `Enter ${field.fieldName}`}
+                    value={formData.customFieldValues[field.fieldName] || ''}
+                    onChange={handleInputChange}
+                    className="input-field"
+                    disabled={availableSeats === 0 || isLoading}
+                    required={field.isRequired}
+                  />
+                )}
+                
+                {field.fieldType === 'date' && (
+                  <div className="date-input-container">
+                    <input
+                      type="date"
+                      id={`custom_${field.fieldName}`}
+                      name={`custom_${field.fieldName}`}
+                      value={formData.customFieldValues[field.fieldName] || ''}
+                      onChange={handleInputChange}
+                      className="input-field date-input"
+                      disabled={availableSeats === 0 || isLoading}
+                      required={field.isRequired}
+                      max={field.fieldName.toLowerCase().includes('birth') ? new Date().toISOString().split('T')[0] : undefined}
+                      min={field.fieldName.toLowerCase().includes('birth') ? "1900-01-01" : undefined}
+                    />
+                    <small className="form-hint">
+                      {field.fieldName.toLowerCase().includes('birth') 
+                        ? "Please enter your date of birth" 
+                        : field.placeholder || `Select a date for ${field.fieldName}`}
+                    </small>
+                  </div>
+                )}
+                
+                {field.fieldType === 'select' && (
+                  <select
+                    id={`custom_${field.fieldName}`}
+                    name={`custom_${field.fieldName}`}
+                    value={formData.customFieldValues[field.fieldName] || ''}
+                    onChange={handleInputChange}
+                    className="input-field"
+                    disabled={availableSeats === 0 || isLoading}
+                    required={field.isRequired}
+                  >
+                    <option value="">Select {field.fieldName}</option>
+                    {field.options && field.options.map((option, i) => (
+                      <option key={i} value={option}>{option}</option>
+                    ))}
+                  </select>
+                )}
+                
+                {field.fieldType === 'checkbox' && (
+                  <div className="checkbox-field">
+                    <input
+                      type="checkbox"
+                      id={`custom_${field.fieldName}`}
+                      name={`custom_${field.fieldName}`}
+                      checked={formData.customFieldValues[field.fieldName] || false}
+                      onChange={handleInputChange}
+                      disabled={availableSeats === 0 || isLoading}
+                      required={field.isRequired}
+                    />
+                    <label htmlFor={`custom_${field.fieldName}`} className="checkbox-label">
+                      {field.placeholder || field.fieldName}
+                    </label>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="debug-message" style={{
+            margin: '20px 0',
+            padding: '15px',
+            border: '1px solid #ddd',
+            borderRadius: '5px',
+            backgroundColor: '#f9f9f9'
+          }}>
+            <p style={{fontWeight: 'bold', color: '#333'}}>No custom fields found for this event.</p>
+            <details>
+              <summary style={{cursor: 'pointer', color: 'blue'}}>Show debug info</summary>
+              <pre style={{
+                backgroundColor: '#eee',
+                padding: '10px',
+                borderRadius: '5px',
+                overflow: 'auto'
+              }}>{JSON.stringify({
+                eventId: eventId,
+                hasEventDetails: !!eventDetails,
+                hasCustomFields: !!(eventDetails && eventDetails.customFields),
+                customFieldsLength: eventDetails?.customFields?.length || 0,
+                customFields: eventDetails?.customFields || []
+              }, null, 2)}</pre>
+            </details>
+          </div>
+        )}
+
         <button
           type="submit"
           className="register-button"
-          disabled={availableSeats === 0 || isLoading || !formData.name || !formData.email || !formData.phone}
+          disabled={
+            availableSeats === 0 || 
+            isLoading || 
+            !formData.name || 
+            !formData.email || 
+            !formData.phone ||
+            (eventDetails && eventDetails.customFields && eventDetails.customFields
+              .some(field => field.isRequired && 
+                (!formData.customFieldValues[field.fieldName] || 
+                 formData.customFieldValues[field.fieldName] === '')
+              )
+            )
+          }
         >
           {isLoading ? (
-            <span className="spinner">.</span>
+            <span className="btn-loading">
+              <span className="btn-text">Processing</span>
+            </span>
           ) : availableSeats === 0 ? (
             "Sold Out"
           ) : (
@@ -265,13 +553,25 @@ export default function Register() {
           )}
         </button>
         
-        {(availableSeats === 0 || isLoading || !formData.name || !formData.email || !formData.phone) && (
+        {(
+          availableSeats === 0 || 
+          isLoading || 
+          !formData.name || 
+          !formData.email || 
+          !formData.phone ||
+          (eventDetails && eventDetails.customFields && eventDetails.customFields
+            .some(field => field.isRequired && 
+              (!formData.customFieldValues[field.fieldName] || 
+               formData.customFieldValues[field.fieldName] === '')
+            )
+          )
+        ) && (
           <small className="form-hint" style={{ marginTop: '0.5rem' }}>
             {availableSeats === 0 ? 
               "This event is sold out" : 
-              !formData.name || !formData.email || !formData.phone ? 
-              "Please fill in all fields to continue" : 
-              "Processing your registration..."}
+              isLoading ?
+              "Processing your registration..." :
+              "Please fill in all required fields to continue"}
           </small>
         )}
       </form>

@@ -48,7 +48,7 @@ const Home = () => {
 
       {isLoading ? (
         <div className="loading-container">
-          <div className="spinner"></div>
+          <div className="spinner-circular"></div>
           <p>Loading events...</p>
         </div>
       ) : events.length === 0 ? (
