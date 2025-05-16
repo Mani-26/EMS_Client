@@ -977,6 +977,39 @@ body.dark-mode .admin-header {
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
 }
 
+/* Featured event styles */
+.featured-event {
+  border: 2px solid #ffc107;
+  position: relative;
+  overflow: visible;
+}
+
+.featured-badge {
+  position: absolute;
+  top: 12px;
+  right: 10px;
+  background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+  color: #fff;
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: bold;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  z-index: 1;
+}
+
+body.dark-mode .featured-event {
+  border-color: #ff9800;
+}
+
+@media (max-width: 768px) {
+  .featured-badge {
+    font-size: 0.75rem;
+    padding: 4px 8px;
+    top: 10px;
+  }
+}
+
 body.dark-mode .event-card {
   background: #2c3e50;
   border-color: #34495e;

@@ -90,6 +90,7 @@ export default function Admin() {
     seatLimit: "",
     isFree: true,
     fee: "",
+    featured: false,
     customFields: []
   });
   
@@ -340,7 +341,7 @@ export default function Admin() {
 
   const handleSaveEvent = async (e) => {
     e.preventDefault();
-    const { name, date, description, venue, seatLimit, isFree, fee } = formData;
+    const { name, date, description, venue, seatLimit, isFree, fee, featured } = formData;
     if (!name || !date || !description || !venue || !seatLimit) {
       Swal.fire({
         icon: "warning",
@@ -904,6 +905,28 @@ export default function Admin() {
                 </div>
               )}
             </div>
+
+            {/* Featured Event Toggle */}
+            <div style={{marginTop: '20px', marginBottom: '20px'}}>
+              <label style={{
+                display: 'flex', 
+                alignItems: 'center', 
+                cursor: 'pointer',
+                fontWeight: 'bold',
+                color: formData.featured ? '#ff9800' : 'inherit'
+              }}>
+                <input
+                  type="checkbox"
+                  checked={formData.featured || false}
+                  onChange={() => setFormData(prev => ({ ...prev, featured: !prev.featured }))}
+                  style={{marginRight: '10px', width: '18px', height: '18px'}}
+                />
+                <span style={{display: 'flex', alignItems: 'center'}}>
+                  {formData.featured ? '⭐ Featured Event' : 'Make this a featured event'} 
+                  {formData.featured && <span style={{fontSize: '0.8rem', marginLeft: '10px', fontWeight: 'normal', fontStyle: 'italic'}}>(Will appear prominently on the home page)</span>}
+                </span>
+              </label>
+            </div>
           </div>
 
           {/* Custom Fields Section */}
@@ -1347,7 +1370,8 @@ export default function Admin() {
         ) : (
           <div className="event-list events-grid">
             {events.map((event) => (
-              <div key={event._id} className="event-card">
+              <div key={event._id} className={`event-card ${event.featured ? 'featured-event' : ''}`}>
+                {event.featured && <div className="featured-badge">⭐ Featured</div>}
                 <h3>{event.name}</h3>
                 <p className="event-date">📅 {event.date ? 
                   (() => {

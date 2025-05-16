@@ -64,7 +64,7 @@ body.dark-mode h1 {
 /* ================================= */
 .register-container {
   max-width: 450px;
-  margin: 5rem auto;
+  /* margin: 5rem auto; */
   padding: 2.5rem;
   border-radius: 15px;
   text-align: center;

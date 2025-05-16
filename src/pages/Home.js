@@ -15,16 +15,25 @@ const Home = () => {
         const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/events`);
         const fetchedEvents = response.data;
 
-        // Sort events: Upcoming first, then expired
+        // Sort events: Featured first, then upcoming, then expired
         const sortedEvents = fetchedEvents.sort((a, b) => {
           const today = new Date().setHours(0, 0, 0, 0);
           const dateA = new Date(a.date).setHours(0, 0, 0, 0);
           const dateB = new Date(b.date).setHours(0, 0, 0, 0);
-
-          if (dateA < today && dateB < today) return dateA - dateB; // Sort expired by date
-          if (dateA < today) return 1; // Expired to the end
-          if (dateB < today) return -1; // Upcoming first
-          return dateA - dateB; // Sort upcoming by date
+          
+          // First prioritize featured events (for non-expired events)
+          if (a.featured && !b.featured && dateA >= today) return -1;
+          if (!a.featured && b.featured && dateB >= today) return 1;
+          
+          // Then sort by date status (upcoming vs expired)
+          if (dateA < today && dateB >= today) return 1; // Expired to the end
+          if (dateA >= today && dateB < today) return -1; // Upcoming first
+          
+          // For two expired events, sort by date
+          if (dateA < today && dateB < today) return dateA - dateB;
+          
+          // For two upcoming events, sort by date
+          return dateA - dateB;
         });
 
         setEvents(sortedEvents);
@@ -70,9 +79,10 @@ const Home = () => {
               return (
                 <div
                   key={event._id}
-                  className={`event-card ${isExpired ? "expired" : ""} ${index === 0 ? "featured" : ""} animated-card card-entrance`}
+                  className={`event-card ${isExpired ? "expired" : ""} ${event.featured ? "featured" : ""} animated-card card-entrance`}
                   style={{ animationDelay: `${index * 0.1}s` }} // Staggered animation
                 >
+                  {event.featured && <div className="featured-badge">⭐ Featured</div>}
                   <h3>{event.name}</h3>
                   <p className="event-date">
                     📅 {eventDate.toLocaleDateString("en-US", {
