@@ -152,25 +152,53 @@ const CheckoutForm = ({ eventId, name, email, phone, eventDetails }) => {
       // Create a file input for screenshot upload
       const fileInputId = 'payment-screenshot-input';
       
-      // Ask for payment screenshot only
+      // Create a custom modal for file upload
+      const uploadModal = document.createElement('div');
+      uploadModal.className = 'custom-upload-modal';
+      uploadModal.innerHTML = `
+        
+        <p>Please upload a screenshot of your payment confirmation</p>
+        <div class="file-upload-container">
+          <label for="${fileInputId}" class="file-upload-label">
+            <span class="upload-icon">📁</span>
+            <span class="upload-text">Click to select file</span>
+          </label>
+          <input type="file" id="${fileInputId}" accept="image/*" style="position: absolute; opacity: 0; width: 0.1px; height: 0.1px; overflow: hidden;">
+          <div id="screenshot-error" style="color: red; font-size: 12px; text-align: left; display: none;">Payment screenshot is required</div>
+        </div>
+        <div id="preview-container" style="margin-top: 10px; display: none;">
+          <img id="screenshot-preview" style="max-width: 100%; max-height: 200px; border: 1px solid #ddd; border-radius: 4px;" />
+        </div>
+      `;
+      
+      document.body.appendChild(uploadModal);
+      
+      // Add event listener for file input
+      const fileInput = document.getElementById(fileInputId);
+      const previewContainer = document.getElementById('preview-container');
+      const previewImage = document.getElementById('screenshot-preview');
+      const screenshotError = document.getElementById('screenshot-error');
+      
+      fileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            previewImage.src = e.target.result;
+            previewContainer.style.display = 'block';
+            screenshotError.style.display = 'none';
+          };
+          reader.readAsDataURL(file);
+        } else {
+          previewContainer.style.display = 'none';
+        }
+      });
+      
+      // Show SweetAlert with custom buttons
       const { value: formValues, dismiss } = await Swal.fire({
-        title: 'Payment Verification',
-        html: `
-          <div class="payment-verification-form">
-            <div class="form-group" style="margin-bottom: 20px;">
-              <label for="${fileInputId}" style="display: block; text-align: left; margin-bottom: 5px; font-weight: bold;">Payment Screenshot *</label>
-              <input type="file" id="${fileInputId}" accept="image/*" style="width: 100%;" required>
-              <div id="screenshot-error" style="color: red; font-size: 12px; text-align: left; display: none;">Payment screenshot is required</div>
-              <div style="font-size: 12px; color: #666; margin-top: 5px; text-align: left;">
-                Please upload a screenshot of your payment confirmation
-              </div>
-            </div>
-            
-            <div id="preview-container" style="margin-top: 10px; display: none;">
-              <img id="screenshot-preview" style="max-width: 100%; max-height: 200px; border: 1px solid #ddd; border-radius: 4px;" />
-            </div>
-          </div>
-        `,
+        title: 'Upload Payment Screenshot',
+        text: 'Please upload a screenshot of your payment confirmation',
+        html: uploadModal,
         showCancelButton: true,
         confirmButtonText: 'Verify Payment',
         cancelButtonText: 'Cancel',
@@ -179,24 +207,45 @@ const CheckoutForm = ({ eventId, name, email, phone, eventDetails }) => {
         allowOutsideClick: false,
         focusConfirm: false,
         didOpen: () => {
-          // Add event listener for file input
-          const fileInput = document.getElementById(fileInputId);
-          const previewContainer = document.getElementById('preview-container');
-          const previewImage = document.getElementById('screenshot-preview');
+          // Re-initialize file input elements inside the SweetAlert modal
+          const fileInput = document.querySelector('.swal2-container #' + fileInputId);
+          const fileLabel = document.querySelector('.swal2-container .file-upload-label');
+          const previewContainer = document.querySelector('.swal2-container #preview-container');
+          const previewImage = document.querySelector('.swal2-container #screenshot-preview');
+          const screenshotError = document.querySelector('.swal2-container #screenshot-error');
           
-          fileInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) {
-              const reader = new FileReader();
-              reader.onload = (e) => {
-                previewImage.src = e.target.result;
-                previewContainer.style.display = 'block';
-              };
-              reader.readAsDataURL(file);
-            } else {
-              previewContainer.style.display = 'none';
-            }
-          });
+          if (fileInput && fileLabel) {
+            fileLabel.addEventListener('click', () => {
+              fileInput.click();
+            });
+            
+            fileInput.addEventListener('change', (e) => {
+              const file = e.target.files[0];
+              if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                  if (previewImage) {
+                    previewImage.src = e.target.result;
+                    if (previewContainer) {
+                      previewContainer.style.display = 'block';
+                    }
+                  }
+                  if (screenshotError) {
+                    screenshotError.style.display = 'none';
+                  }
+                  
+                  // Update the label text to show the file name
+                  const uploadText = document.querySelector('.swal2-container .upload-text');
+                  if (uploadText) {
+                    uploadText.textContent = file.name;
+                  }
+                };
+                reader.readAsDataURL(file);
+              } else if (previewContainer) {
+                previewContainer.style.display = 'none';
+              }
+            });
+          }
         },
         preConfirm: () => {
           const fileInput = document.getElementById(fileInputId);
@@ -205,10 +254,13 @@ const CheckoutForm = ({ eventId, name, email, phone, eventDetails }) => {
           let isValid = true;
           
           // Validate screenshot
-          if (!fileInput.files || fileInput.files.length === 0) {
-            screenshotError.style.display = 'block';
+          if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+            if (screenshotError) {
+              screenshotError.style.display = 'block';
+            }
+            Swal.showValidationMessage('Please upload a payment screenshot');
             isValid = false;
-          } else {
+          } else if (screenshotError) {
             screenshotError.style.display = 'none';
           }
           
@@ -222,6 +274,11 @@ const CheckoutForm = ({ eventId, name, email, phone, eventDetails }) => {
           };
         }
       });
+      
+      // Remove the custom modal element from the DOM
+      if (uploadModal && uploadModal.parentNode) {
+        uploadModal.parentNode.removeChild(uploadModal);
+      }
       
       // If user cancels or validation fails
       if (dismiss === Swal.DismissReason.cancel || !formValues) {
@@ -394,26 +451,21 @@ const CheckoutForm = ({ eventId, name, email, phone, eventDetails }) => {
       )}
       
       <form onSubmit={handleSubmit}>
-        <div className="card-details">
-          <h3>Your Information</h3>
-          <div className="form-group">
-            <label>Name</label>
-            <input type="text" value={name} disabled className="upi-input" />
-          </div>
-          
-          <div className="form-group" style={{ marginTop: '1rem' }}>
-            <label>Email</label>
-            <input type="email" value={email} disabled className="upi-input" />
-          </div>
-          
-          <div className="form-group" style={{ marginTop: '1rem' }}>
-            <label>Phone</label>
-            <input 
-              type="tel" 
-              value={phone} 
-              className="upi-input"
-              disabled
-            />
+        <div className="card-details" style={{overflow:'scroll'}}>
+          <h3 style={{ color: 'var(--text-color, #333)' }}>Your Information</h3>
+          <div className="user-info-table">
+            <div className="user-info-row">
+              <div className="user-info-label">Name:</div>
+              <div className="user-info-value">{name}</div>
+            </div>
+            <div className="user-info-row">
+              <div className="user-info-label">Email:</div>
+              <div className="user-info-value">{email}</div>
+            </div>
+            <div className="user-info-row">
+              <div className="user-info-label">Phone:</div>
+              <div className="user-info-value">{phone}</div>
+            </div>
           </div>
         </div>
         
