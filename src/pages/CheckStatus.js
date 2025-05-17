@@ -180,15 +180,15 @@ export default function CheckStatus() {
               </span>
             </div>
             
-            <div className="status-body">
+            <div className="status-body" style={{ color: 'inherit' }}>
               <div className="status-row form-group">
                 <span className="status-label">Name:</span>
-                <span className="status-value">{registrationData.name}</span>
+                <span className="status-value">{registrationData.name || 'Not provided'}</span>
               </div>
               
               <div className="status-row form-group">
                 <span className="status-label">Email:</span>
-                <span className="status-value">{registrationData.email}</span>
+                <span className="status-value">{registrationData.email || 'Not provided'}</span>
               </div>
               
               <div className="status-row form-group">
@@ -198,17 +198,22 @@ export default function CheckStatus() {
               
               <div className="status-row form-group">
                 <span className="status-label">Ticket ID:</span>
-                <span className="status-value">{registrationData.ticketId}</span>
+                <span className="status-value">{registrationData.ticketId || 'Not assigned'}</span>
               </div>
               
               <div className="status-row form-group">
                 <span className="status-label">Event:</span>
-                <span className="status-value">{registrationData.eventName}</span>
+                <span className="status-value">{registrationData.eventName || 'Not specified'}</span>
               </div>
               
               <div className="status-row form-group">
                 <span className="status-label">Payment Method:</span>
                 <span className="status-value">{registrationData.paymentMethod?.toUpperCase() || 'N/A'}</span>
+              </div>
+              
+              <div className="status-row form-group">
+                <span className="status-label">Payment Status:</span>
+                <span className="status-value">{getStatusText(registrationData.paymentStatus)}</span>
               </div>
               
               {registrationData.paymentVerified && (

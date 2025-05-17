@@ -36,13 +36,14 @@ body.dark-mode .check-status-container h1 {
 .status-form {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 0.75rem;
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.3rem;
+  margin-bottom: 0.5rem;
 }
 
 .form-group label {
@@ -115,8 +116,8 @@ body.dark-mode .input-field {
 }
 
 .status-result {
-  margin-top: 2rem;
-  padding-top: 2rem;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
 }
 
 body.light-mode .status-result {
@@ -129,7 +130,8 @@ body.dark-mode .status-result {
 
 .status-result h2 {
   text-align: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
+  font-size: 1.4rem;
 }
 
 body.light-mode .status-result h2 {
@@ -144,16 +146,20 @@ body.dark-mode .status-result h2 {
   border-radius: 12px;
   overflow: hidden;
   transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  display: flex;
+  flex-direction: column;
 }
 
 body.light-mode .status-card {
   background-color: #f8f9fa;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  color: #333;
 }
 
 body.dark-mode .status-card {
   background-color: #2b2b2b;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  color: #f5f5f5;
 }
 
 .status-card:hover {
@@ -161,7 +167,7 @@ body.dark-mode .status-card {
 }
 
 .status-header {
-  padding: 1rem;
+  padding: 0.75rem;
   text-align: center;
 }
 
@@ -206,14 +212,16 @@ body.dark-mode .status-header {
 }
 
 .status-body {
-  padding: 1.5rem;
-  overflow: scroll;
+  padding: 1rem;
+  overflow: auto;
+  max-height: 400px; /* Set a max height to ensure scrolling works properly */
 }
 
 .status-row {
   display: flex;
-  margin-bottom: 0.75rem;
-  padding-bottom: 0.75rem;
+  margin-bottom: 0.4rem;
+  padding-bottom: 0.4rem;
+  flex-wrap: wrap; /* Allow wrapping for small screens */
 }
 
 body.light-mode .status-row {
@@ -231,8 +239,9 @@ body.dark-mode .status-row {
 }
 
 .status-label {
-  flex: 0 0 120px;
+  flex: 0 0 10px;
   font-weight: 600;
+  padding-right: 10px;
 }
 
 body.light-mode .status-label {
@@ -240,11 +249,12 @@ body.light-mode .status-label {
 }
 
 body.dark-mode .status-label {
-  color: #aaa;
+  color: #ddd; /* Lighter color for better visibility */
 }
 
 .status-value {
   flex: 1;
+  word-break: break-word; /* Prevent overflow of long values */
 }
 
 body.light-mode .status-value {
@@ -308,7 +318,7 @@ body.dark-mode .ticket-qr {
 
 .back-link {
   text-align: center;
-  margin-top: 2rem;
+  margin-top: 1rem;
 }
 
 .back-link a {
@@ -356,6 +366,19 @@ body.dark-mode .status-badge.failed {
   }
   
   .status-label {
-    flex: 0 0 100px;
+    flex: 0 0 10px;
+  }
+  
+  .status-row {
+    flex-direction: column;
+    padding-bottom: 1rem;
+  }
+  
+  .status-label {
+    margin-bottom: 0.25rem;
+  }
+  
+  .status-value {
+    padding-left: 0.5rem;
   }
 }

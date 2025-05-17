@@ -436,53 +436,53 @@ const CheckoutForm = ({ eventId, name, email, phone, eventDetails }) => {
       </p>
       
       {eventDetails && (
-        <div className="event-summary">
-          <h3>Event Details</h3>
-          <p><strong>{eventDetails.name}</strong></p>
-          <p className="event-date">📅 Date: {new Date(eventDetails.date).toLocaleDateString("en-US", {
+        <div className="event-summary" style={{ padding: '0.75rem' }}>
+          <h3 style={{ marginBottom: '0.3rem' }}>Event Details</h3>
+          <p style={{ margin: '0.2rem 0' }}><strong>{eventDetails.name}</strong></p>
+          <p className="event-date" style={{ margin: '0.2rem 0' }}>📅 {new Date(eventDetails.date).toLocaleDateString("en-US", {
             weekday: "long",
             year: "numeric",
             month: "long",
             day: "numeric",
           })}</p>
-          <p className="event-venue">📍 Venue: {eventDetails.venue}</p>
-          <p className="event-fee">💰 Fee: ₹{eventDetails.fee}</p>
+          <p className="event-venue" style={{ margin: '0.2rem 0' }}>📍 {eventDetails.venue}</p>
+          <p className="event-fee" style={{ margin: '0.2rem 0' }}>💰 ₹{eventDetails.fee}</p>
         </div>
       )}
       
       <form onSubmit={handleSubmit}>
-        <div className="card-details" style={{overflow:'scroll'}}>
-          <h3 style={{ color: 'var(--text-color, #333)' }}>Your Information</h3>
-          <div className="user-info-table">
-            <div className="user-info-row">
+        <div className="card-details" style={{overflow:'auto', maxHeight: '200px'}}>
+          <h3 style={{ color: 'var(--text-color, #333)', marginBottom: '0.3rem' }}>Your Information</h3>
+          <div className="user-info-table" style={{ marginTop: '0.3rem' }}>
+            <div className="user-info-row" style={{ padding: '0.3rem 0' }}>
               <div className="user-info-label">Name:</div>
               <div className="user-info-value">{name}</div>
             </div>
-            <div className="user-info-row">
+            <div className="user-info-row" style={{ padding: '0.3rem 0' }}>
               <div className="user-info-label">Email:</div>
               <div className="user-info-value">{email}</div>
             </div>
-            <div className="user-info-row">
+            <div className="user-info-row" style={{ padding: '0.3rem 0', borderBottom: 'none' }}>
               <div className="user-info-label">Phone:</div>
               <div className="user-info-value">{phone}</div>
             </div>
           </div>
         </div>
         
-        <div className="payment-method-selector">
-          <h3>Payment Method</h3>
-          <div className="payment-option selected">
+        <div className="payment-method-selector" style={{ padding: '0.75rem' }}>
+          <h3 style={{ marginBottom: '0.3rem' }}>Payment Method</h3>
+          <div className="payment-option selected" style={{ padding: '0.75rem' }}>
             <div className="payment-icon">
               <img 
                 src="/upi-icon.png" 
                 alt="UPI" 
-                style={{ width: '50px', height: '50px' }}
+                style={{ width: '40px', height: '40px' }}
                 onError={(e) => e.target.src = 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/UPI-Logo-vector.svg/1200px-UPI-Logo-vector.svg.png'} 
               />
             </div>
             <div>
-              <div className="payment-method-name" style={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>UPI Payment</div>
-              <div className="payment-method-description" style={{ fontSize: '0.9rem' }}>
+              <div className="payment-method-name" style={{ fontWeight: 'bold', marginBottom: '0.1rem' }}>UPI Payment</div>
+              <div className="payment-method-description" style={{ fontSize: '0.85rem' }}>
                 Pay using Google Pay, PhonePe, Paytm, or any UPI app
               </div>
             </div>
