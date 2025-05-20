@@ -10,9 +10,9 @@ export default function AdminLogin() {
 
   const handleLogin = async () => {
     try {
-      console.log("Attempting login with:", { email });
+      // console.log("Attempting login with:", { email });
       const res = await axios.post(`${process.env.REACT_APP_API_URL}/api/admin/login`, { email, password });
-      console.log("Login response:", res.data);
+      // console.log("Login response:", res.data);
       
       // Store token in both sessionStorage and localStorage for consistency
       const token = res.data.token;

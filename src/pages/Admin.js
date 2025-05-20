@@ -99,10 +99,10 @@ export default function Admin() {
   
   // Ensure formData is properly initialized
   useEffect(() => {
-    console.log("Current form data state:", formData);
-    console.log("Form data UPI ID:", formData.upiId);
-    console.log("Form data phone number:", formData.phoneNumber);
-    console.log("Form data featured:", formData.featured);
+    // console.log("Current form data state:", formData);
+    // console.log("Form data UPI ID:", formData.upiId);
+    // console.log("Form data phone number:", formData.phoneNumber);
+    // console.log("Form data featured:", formData.featured);
   }, [formData]);
   
   // Function to handle logout
@@ -131,7 +131,7 @@ export default function Admin() {
   useEffect(() => {
     // Check both sessionStorage and localStorage for the token
     const token = sessionStorage.getItem("token") || localStorage.getItem("token");
-    console.log("Admin page - token check:", !!token);
+    // console.log("Admin page - token check:", !!token);
     
     if (!token) {
       console.log("No token found, redirecting to login");
@@ -342,7 +342,7 @@ export default function Admin() {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    console.log(`Input change - Field: ${name}, Value: ${value}`);
+    // console.log(`Input change - Field: ${name}, Value: ${value}`);
     
     // For UPI ID and phone number, log extra debugging
     if (name === 'upiId' || name === 'phoneNumber') {
@@ -351,7 +351,7 @@ export default function Admin() {
     
     setFormData((prev) => {
       const newData = { ...prev, [name]: value };
-      console.log(`Updated form data for ${name}:`, newData);
+      // console.log(`Updated form data for ${name}:`, newData);
       return newData;
     });
   };
@@ -433,10 +433,10 @@ export default function Admin() {
     
     try {
       // Log the form data being sent
-      console.log("Saving event with data:", formData);
-      console.log("Custom fields:", formData.customFields);
-      console.log("UPI ID being sent:", formData.upiId);
-      console.log("Phone number being sent:", formData.phoneNumber);
+      // console.log("Saving event with data:", formData);
+      // console.log("Custom fields:", formData.customFields);
+      // console.log("UPI ID being sent:", formData.upiId);
+      // console.log("Phone number being sent:", formData.phoneNumber);
       
       // Create a copy of the form data to ensure UPI ID and phone number are included
       const dataToSend = { ...formData };
@@ -448,7 +448,7 @@ export default function Admin() {
           const upiInput = document.querySelector('input[name="upiId"]');
           if (upiInput) {
             dataToSend.upiId = upiInput.value || "";
-            console.log("Retrieved UPI ID from input:", dataToSend.upiId);
+            // console.log("Retrieved UPI ID from input:", dataToSend.upiId);
           }
         }
         
@@ -457,7 +457,7 @@ export default function Admin() {
           const phoneInput = document.querySelector('input[name="phoneNumber"]');
           if (phoneInput) {
             dataToSend.phoneNumber = phoneInput.value || "";
-            console.log("Retrieved phone number from input:", dataToSend.phoneNumber);
+            // console.log("Retrieved phone number from input:", dataToSend.phoneNumber);
           }
         }
       }
@@ -468,7 +468,7 @@ export default function Admin() {
         const featuredCheckbox = document.querySelector('input[type="checkbox"][name="featured"]');
         if (featuredCheckbox) {
           dataToSend.featured = featuredCheckbox.checked;
-          console.log("Retrieved featured status from checkbox:", dataToSend.featured);
+          // console.log("Retrieved featured status from checkbox:", dataToSend.featured);
         } else {
           // Default to false if checkbox not found
           dataToSend.featured = false;
@@ -476,13 +476,13 @@ export default function Admin() {
       }
       
       if (editingEvent) {
-        console.log("Sending data to server:", dataToSend);
+        // console.log("Sending data to server:", dataToSend);
         const response = await axios.put(
           `${process.env.REACT_APP_API_URL}/api/events/${editingEvent._id}`,
           dataToSend
         );
         
-        console.log("Event update response:", response.data);
+        // console.log("Event update response:", response.data);
         
         // Update the events list with the updated event data
         if (response.data.event) {
@@ -501,7 +501,7 @@ export default function Admin() {
           showConfirmButton: false,
         });
       } else {
-        console.log("Creating new event with data:", dataToSend);
+        // console.log("Creating new event with data:", dataToSend);
         await axios.post(`${process.env.REACT_APP_API_URL}/api/events`, dataToSend);
         Swal.fire({
           icon: "success",
@@ -573,13 +573,13 @@ export default function Admin() {
 
   const handleEditEvent = (event) => {
     // Add extensive debugging to see what we're getting
-    console.log("Edit event clicked with data:", JSON.stringify(event, null, 2));
-    console.log("Current form data before edit:", formData);
+    // console.log("Edit event clicked with data:", JSON.stringify(event, null, 2));
+    // console.log("Current form data before edit:", formData);
     
     // Fetch the full event data from the server to ensure we have all fields
     axios.get(`${process.env.REACT_APP_API_URL}/api/events/${event._id}`)
       .then(response => {
-        console.log("Fetched event data from server:", response.data);
+        // console.log("Fetched event data from server:", response.data);
         // Continue with the edit using the fetched data
         handleEditWithFullData({...event, ...response.data});
       })
@@ -638,7 +638,7 @@ export default function Admin() {
       formattedDate = event.date || "";
     }
     
-    console.log("Formatted date for form:", formattedDate);
+    // console.log("Formatted date for form:", formattedDate);
     
     // Ensure custom fields are properly formatted
     const formattedCustomFields = [];
@@ -655,11 +655,11 @@ export default function Admin() {
       });
     }
     
-    console.log("Formatted custom fields:", formattedCustomFields);
+    // console.log("Formatted custom fields:", formattedCustomFields);
     
     // Log UPI ID and phone number specifically
-    console.log("Event UPI ID:", event.upiId);
-    console.log("Event phone number:", event.phoneNumber);
+    // console.log("Event UPI ID:", event.upiId);
+    // console.log("Event phone number:", event.phoneNumber);
     
     // Create the form data object
     const newFormData = {
@@ -676,7 +676,7 @@ export default function Admin() {
       customFields: formattedCustomFields
     };
     
-    console.log("Setting form data to:", newFormData);
+    // console.log("Setting form data to:", newFormData);
     
     // First set showForm to false to reset any previous state
     setShowForm(false);
@@ -696,13 +696,13 @@ export default function Admin() {
       customFields: formattedCustomFields
     };
     
-    console.log("Setting clean form data:", cleanFormData);
+    // console.log("Setting clean form data:", cleanFormData);
     
     // Use a timeout to ensure the state updates properly
     setTimeout(() => {
       // Set the form data and editing event state
-      console.log("Setting form data with UPI ID:", cleanFormData.upiId);
-      console.log("Setting form data with phone number:", cleanFormData.phoneNumber);
+      // console.log("Setting form data with UPI ID:", cleanFormData.upiId);
+      // console.log("Setting form data with phone number:", cleanFormData.phoneNumber);
       
       setFormData(cleanFormData);
       setEditingEvent({...event});
@@ -710,10 +710,10 @@ export default function Admin() {
       // Show the form after a short delay
       setTimeout(() => {
         setShowForm(true);
-        console.log("Form should now be visible");
-        console.log("Form data after update:", formData);
-        console.log("UPI ID after update:", formData.upiId);
-        console.log("Phone number after update:", formData.phoneNumber);
+        // console.log("Form should now be visible");
+        // console.log("Form data after update:", formData);
+        // console.log("UPI ID after update:", formData.upiId);
+        // console.log("Phone number after update:", formData.phoneNumber);
       }, 100);
     }, 50);
   };
@@ -732,13 +732,13 @@ export default function Admin() {
       const eventCustomFields = res.data.eventCustomFields || [];
       const registrationsData = res.data.registrations || [];
       
-      console.log("Event custom fields:", eventCustomFields);
-      console.log("Registrations data:", registrationsData);
+      // console.log("Event custom fields:", eventCustomFields);
+      // console.log("Registrations data:", registrationsData);
       
       // Process the registration data to ensure customFieldValues is properly handled
       const processedRegistrations = registrationsData.map(registration => {
         // Log the raw customFieldValues for debugging
-        console.log("Registration customFieldValues:", registration.customFieldValues);
+        // console.log("Registration customFieldValues:", registration.customFieldValues);
         
         // Process customFieldValues based on its type
         let processedCustomFieldValues = {};
@@ -767,7 +767,7 @@ export default function Admin() {
           }
         }
         
-        console.log("Processed customFieldValues:", processedCustomFieldValues);
+        // console.log("Processed customFieldValues:", processedCustomFieldValues);
         
         return {
           ...registration,
@@ -777,7 +777,7 @@ export default function Admin() {
         };
       });
       
-      console.log("Processed registrations:", processedRegistrations);
+      // console.log("Processed registrations:", processedRegistrations);
       
       // Set data after a slight delay to ensure scroll completes
       setTimeout(() => {
@@ -867,7 +867,7 @@ export default function Admin() {
       </div>
 
       {/* Event Form */}
-      {console.log("Rendering form section, showForm:", showForm, "editingEvent:", editingEvent, "isDarkMode:", isDarkMode)}
+      {/* {console.log("Rendering form section, showForm:", showForm, "editingEvent:", editingEvent, "isDarkMode:", isDarkMode)} */}
       {showForm && (
         <div 
           className={`event-form-container ${isDarkMode ? 'dark-mode' : 'light-mode'}`}
@@ -900,7 +900,7 @@ export default function Admin() {
           }}>
             {editingEvent ? "✏️ Edit Event" : "➕ New Event"}
           </h2>
-          {console.log("Form data being rendered:", JSON.stringify(formData, null, 2))}
+          {/* {console.log("Form data being rendered:", JSON.stringify(formData, null, 2))} */}
           
           <form 
             className={`event-edit-form ${isDarkMode ? 'dark-mode' : 'light-mode'}`}
@@ -1609,7 +1609,7 @@ export default function Admin() {
                         <td>
                           {(() => {
                             // Debug log
-                            console.log(`Custom field values for ${user.name}:`, user.customFieldValues);
+                            // console.log(`Custom field values for ${user.name}:`, user.customFieldValues);
                             
                             // Check if we have valid custom field values
                             let hasCustomFields = false;
@@ -1617,7 +1617,7 @@ export default function Admin() {
                             
                             // First, check if the user has customFieldValues
                             if (user.customFieldValues) {
-                              console.log(`Custom field values type for ${user.name}:`, typeof user.customFieldValues);
+                              // console.log(`Custom field values type for ${user.name}:`, typeof user.customFieldValues);
                               
                               if (typeof user.customFieldValues === 'object') {
                                 if (user.customFieldValues instanceof Map) {
@@ -1662,7 +1662,7 @@ export default function Admin() {
                               }
                             }
                             
-                            console.log(`Custom field entries for ${user.name}:`, customFieldEntries);
+                            // console.log(`Custom field entries for ${user.name}:`, customFieldEntries);
                             
                             if (hasCustomFields && customFieldEntries.length > 0) {
                               return (

@@ -21,16 +21,16 @@ export default function Register() {
 
   // Fetch event details
   useEffect(() => {
-    console.log("Event ID from URL:", eventId);
+    // console.log("Event ID from URL:", eventId);
     
     const fetchEventDetails = async () => {
       try {
-        console.log("Fetching event details for ID:", eventId);
+        // console.log("Fetching event details for ID:", eventId);
         const res = await axios.get(
           `${process.env.REACT_APP_API_URL}/api/events/${eventId}`
         );
-        console.log("Event details from API:", res.data);
-        console.log("Custom fields:", res.data.customFields);
+        // console.log("Event details from API:", res.data);
+        // console.log("Custom fields:", res.data.customFields);
         setEventName(res.data.name);
         setEventDetails(res.data);
         setAvailableSeats(res.data.seatLimit - res.data.registeredUsers);
@@ -166,7 +166,7 @@ export default function Register() {
         // Store date in ISO format (YYYY-MM-DD)
         fieldValue = value; // Already in YYYY-MM-DD format from input
         
-        console.log(`Date field ${fieldName} value:`, fieldValue);
+        // console.log(`Date field ${fieldName} value:`, fieldValue);
       }
       
       setFormData((prev) => ({
@@ -255,14 +255,14 @@ export default function Register() {
       }
 
       // Debug log
-      console.log("Registering user:", { 
-        name, 
-        email, 
-        phone, 
-        eventId,
-        customFieldValues: formData.customFieldValues 
-      });
-      console.log("API URL:", process.env.REACT_APP_API_URL);
+      // console.log("Registering user:", { 
+      //   name, 
+      //   email, 
+      //   phone, 
+      //   eventId,
+      //   customFieldValues: formData.customFieldValues 
+      // });
+      // console.log("API URL:", process.env.REACT_APP_API_URL);
       
       try {
         // Register user
@@ -276,11 +276,11 @@ export default function Register() {
 
         // Check if this is a paid event that requires payment
         if (res.data.isPaid) {
-          console.log("Paid event detected in success response");
+          // console.log("Paid event detected in success response");
           
           // Store custom field values in sessionStorage
           sessionStorage.setItem('customFieldValues', JSON.stringify(formData.customFieldValues));
-          console.log("Stored custom field values:", formData.customFieldValues);
+          // console.log("Stored custom field values:", formData.customFieldValues);
           
           // Redirect to payment page with user details in the URL (including phone)
           navigate(`/payment/${eventId}/${encodeURIComponent(name)}/${encodeURIComponent(email)}/${encodeURIComponent(phone)}`);
@@ -293,7 +293,7 @@ export default function Register() {
           
           // Store custom field values in sessionStorage
           sessionStorage.setItem('customFieldValues', JSON.stringify(formData.customFieldValues));
-          console.log("Stored custom field values:", formData.customFieldValues);
+          // console.log("Stored custom field values:", formData.customFieldValues);
           
           // Redirect to payment page with user details in the URL (including phone)
           navigate(`/payment/${eventId}/${encodeURIComponent(name)}/${encodeURIComponent(email)}/${encodeURIComponent(phone)}`);
