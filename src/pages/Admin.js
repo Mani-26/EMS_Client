@@ -100,6 +100,9 @@ export default function Admin() {
   // Ensure formData is properly initialized
   useEffect(() => {
     console.log("Current form data state:", formData);
+    console.log("Form data UPI ID:", formData.upiId);
+    console.log("Form data phone number:", formData.phoneNumber);
+    console.log("Form data featured:", formData.featured);
   }, [formData]);
   
   // Function to handle logout
@@ -339,7 +342,18 @@ export default function Admin() {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    console.log(`Input change - Field: ${name}, Value: ${value}`);
+    
+    // For UPI ID and phone number, log extra debugging
+    if (name === 'upiId' || name === 'phoneNumber') {
+      console.log(`Updating ${name} from "${formData[name]}" to "${value}"`);
+    }
+    
+    setFormData((prev) => {
+      const newData = { ...prev, [name]: value };
+      console.log(`Updated form data for ${name}:`, newData);
+      return newData;
+    });
   };
 
   const handleSaveEvent = async (e) => {
@@ -421,12 +435,64 @@ export default function Admin() {
       // Log the form data being sent
       console.log("Saving event with data:", formData);
       console.log("Custom fields:", formData.customFields);
+      console.log("UPI ID being sent:", formData.upiId);
+      console.log("Phone number being sent:", formData.phoneNumber);
+      
+      // Create a copy of the form data to ensure UPI ID and phone number are included
+      const dataToSend = { ...formData };
+      
+      // Ensure UPI ID and phone number are included for paid events
+      if (!formData.isFree) {
+        if (!dataToSend.upiId) {
+          console.log("UPI ID is missing, using value from input field");
+          const upiInput = document.querySelector('input[name="upiId"]');
+          if (upiInput) {
+            dataToSend.upiId = upiInput.value || "";
+            console.log("Retrieved UPI ID from input:", dataToSend.upiId);
+          }
+        }
+        
+        if (!dataToSend.phoneNumber) {
+          console.log("Phone number is missing, using value from input field");
+          const phoneInput = document.querySelector('input[name="phoneNumber"]');
+          if (phoneInput) {
+            dataToSend.phoneNumber = phoneInput.value || "";
+            console.log("Retrieved phone number from input:", dataToSend.phoneNumber);
+          }
+        }
+      }
+      
+      // Ensure featured field is included
+      if (dataToSend.featured === undefined) {
+        console.log("Featured field is missing, checking checkbox");
+        const featuredCheckbox = document.querySelector('input[type="checkbox"][name="featured"]');
+        if (featuredCheckbox) {
+          dataToSend.featured = featuredCheckbox.checked;
+          console.log("Retrieved featured status from checkbox:", dataToSend.featured);
+        } else {
+          // Default to false if checkbox not found
+          dataToSend.featured = false;
+        }
+      }
       
       if (editingEvent) {
-        await axios.put(
+        console.log("Sending data to server:", dataToSend);
+        const response = await axios.put(
           `${process.env.REACT_APP_API_URL}/api/events/${editingEvent._id}`,
-          formData
+          dataToSend
         );
+        
+        console.log("Event update response:", response.data);
+        
+        // Update the events list with the updated event data
+        if (response.data.event) {
+          setEvents(prevEvents => 
+            prevEvents.map(e => 
+              e._id === editingEvent._id ? {...e, ...response.data.event} : e
+            )
+          );
+        }
+        
         Swal.fire({
           icon: "success",
           title: "Updated!",
@@ -435,7 +501,8 @@ export default function Admin() {
           showConfirmButton: false,
         });
       } else {
-        await axios.post(`${process.env.REACT_APP_API_URL}/api/events`, formData);
+        console.log("Creating new event with data:", dataToSend);
+        await axios.post(`${process.env.REACT_APP_API_URL}/api/events`, dataToSend);
         Swal.fire({
           icon: "success",
           title: "Created!",
@@ -509,6 +576,22 @@ export default function Admin() {
     console.log("Edit event clicked with data:", JSON.stringify(event, null, 2));
     console.log("Current form data before edit:", formData);
     
+    // Fetch the full event data from the server to ensure we have all fields
+    axios.get(`${process.env.REACT_APP_API_URL}/api/events/${event._id}`)
+      .then(response => {
+        console.log("Fetched event data from server:", response.data);
+        // Continue with the edit using the fetched data
+        handleEditWithFullData({...event, ...response.data});
+      })
+      .catch(error => {
+        console.error("Error fetching event data:", error);
+        // Fall back to using the provided event data
+        handleEditWithFullData(event);
+      });
+  };
+  
+  const handleEditWithFullData = (event) => {
+    
     // First, make sure we have a valid event object
     if (!event || typeof event !== 'object') {
       console.error("Invalid event object:", event);
@@ -574,6 +657,10 @@ export default function Admin() {
     
     console.log("Formatted custom fields:", formattedCustomFields);
     
+    // Log UPI ID and phone number specifically
+    console.log("Event UPI ID:", event.upiId);
+    console.log("Event phone number:", event.phoneNumber);
+    
     // Create the form data object
     const newFormData = {
       name: event.name || "",
@@ -583,6 +670,9 @@ export default function Admin() {
       seatLimit: event.seatLimit?.toString() || "",
       isFree: event.isFree !== undefined ? Boolean(event.isFree) : true,
       fee: event.fee?.toString() || "",
+      featured: event.featured !== undefined ? Boolean(event.featured) : false,
+      upiId: event.upiId || "",
+      phoneNumber: event.phoneNumber || "",
       customFields: formattedCustomFields
     };
     
@@ -600,6 +690,9 @@ export default function Admin() {
       seatLimit: event.seatLimit?.toString() || "",
       isFree: event.isFree !== undefined ? Boolean(event.isFree) : true,
       fee: event.fee?.toString() || "",
+      featured: event.featured !== undefined ? Boolean(event.featured) : false,
+      upiId: event.upiId || "",
+      phoneNumber: event.phoneNumber || "",
       customFields: formattedCustomFields
     };
     
@@ -608,6 +701,9 @@ export default function Admin() {
     // Use a timeout to ensure the state updates properly
     setTimeout(() => {
       // Set the form data and editing event state
+      console.log("Setting form data with UPI ID:", cleanFormData.upiId);
+      console.log("Setting form data with phone number:", cleanFormData.phoneNumber);
+      
       setFormData(cleanFormData);
       setEditingEvent({...event});
       
@@ -615,7 +711,10 @@ export default function Admin() {
       setTimeout(() => {
         setShowForm(true);
         console.log("Form should now be visible");
-      }, 50);
+        console.log("Form data after update:", formData);
+        console.log("UPI ID after update:", formData.upiId);
+        console.log("Phone number after update:", formData.phoneNumber);
+      }, 100);
     }, 50);
   };
 
@@ -624,32 +723,57 @@ export default function Admin() {
       // Scroll to top of the page
       window.scrollTo({ top: 0, behavior: 'smooth' });
       
-      // First, fetch the event details to get the custom fields
-      const eventRes = await axios.get(
-        `${process.env.REACT_APP_API_URL}/api/events/${eventId}`
-      );
-      
-      const eventCustomFields = eventRes.data.customFields || [];
-      console.log("Event custom fields:", eventCustomFields);
-      
-      // Then fetch the registrations
+      // Fetch the registrations with event custom fields
       const res = await axios.get(
         `${process.env.REACT_APP_API_URL}/api/events/${eventId}/registrations`
       );
       
+      // Extract event custom fields and registrations from the response
+      const eventCustomFields = res.data.eventCustomFields || [];
+      const registrationsData = res.data.registrations || [];
+      
+      console.log("Event custom fields:", eventCustomFields);
+      console.log("Registrations data:", registrationsData);
+      
       // Process the registration data to ensure customFieldValues is properly handled
-      const processedRegistrations = res.data.map(registration => {
+      const processedRegistrations = registrationsData.map(registration => {
         // Log the raw customFieldValues for debugging
         console.log("Registration customFieldValues:", registration.customFieldValues);
         
-        // Ensure customFieldValues is an object
-        const customFieldValues = registration.customFieldValues || {};
+        // Process customFieldValues based on its type
+        let processedCustomFieldValues = {};
+        let hasCustomFields = registration.hasCustomFields || false;
+        
+        if (registration.customFieldValues) {
+          if (typeof registration.customFieldValues === 'string') {
+            // Try to parse if it's a JSON string
+            try {
+              processedCustomFieldValues = JSON.parse(registration.customFieldValues);
+              hasCustomFields = Object.keys(processedCustomFieldValues).length > 0;
+            } catch (e) {
+              console.error("Error parsing customFieldValues JSON string:", e);
+            }
+          } else if (registration.customFieldValues instanceof Map) {
+            // Convert Map to object
+            processedCustomFieldValues = {};
+            registration.customFieldValues.forEach((value, key) => {
+              processedCustomFieldValues[key] = value;
+            });
+            hasCustomFields = Object.keys(processedCustomFieldValues).length > 0;
+          } else if (typeof registration.customFieldValues === 'object' && !Array.isArray(registration.customFieldValues)) {
+            // It's already an object
+            processedCustomFieldValues = registration.customFieldValues;
+            hasCustomFields = Object.keys(processedCustomFieldValues).length > 0;
+          }
+        }
+        
+        console.log("Processed customFieldValues:", processedCustomFieldValues);
         
         return {
           ...registration,
-          customFieldValues,
-          // Add a property to indicate if this registration has custom field values
-          hasCustomFields: Object.keys(customFieldValues).length > 0
+          customFieldValues: processedCustomFieldValues,
+          hasCustomFields: hasCustomFields,
+          eventCustomFields: eventCustomFields // Add the event custom fields to each registration
         };
       });
       
@@ -1011,6 +1135,7 @@ export default function Admin() {
               }}>
                 <input
                   type="checkbox"
+                  name="featured"
                   checked={formData.featured || false}
                   onChange={() => setFormData(prev => ({ ...prev, featured: !prev.featured }))}
                   style={{marginRight: '10px', width: '18px', height: '18px'}}
@@ -1060,14 +1185,57 @@ export default function Admin() {
                 animationDelay: `${index * 0.1}s`,
                 animationFillMode: 'both'
               }}>
+                {/* Custom Field Header with Field Number */}
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginBottom: '15px',
+                  borderBottom: '1px solid #ddd',
+                  paddingBottom: '10px'
+                }}>
+                  <h4 style={{margin: 0, color: '#333'}}>Field #{index + 1}</h4>
+                  
+                  <button 
+                    type="button"
+                    onClick={() => {
+                      const updatedFields = formData.customFields.filter((_, i) => i !== index);
+                      setFormData({...formData, customFields: updatedFields});
+                    }}
+                    style={{
+                      backgroundColor: '#dc3545',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '4px',
+                      padding: '6px 12px',
+                      cursor: 'pointer',
+                      fontSize: '14px',
+                      display: 'flex',
+                      alignItems: 'center'
+                    }}
+                  >
+                    <span style={{marginRight: '5px'}}>✕</span> Remove
+                  </button>
+                </div>
+                
+                {/* Main Field Properties */}
                 <div style={{
                   display: 'grid',
-                  gridTemplateColumns: '1fr 1fr',
-                  gap: '15px',
+                  gridTemplateColumns: 'repeat(2, 1fr)',
+                  gap: '20px',
                   marginBottom: '15px'
                 }}>
-                  <div>
-                    <label style={{display: 'block', marginBottom: '5px', fontWeight: 'bold'}}>Field Name</label>
+                  {/* Field Name */}
+                  <div style={{gridColumn: '1 / 2'}}>
+                    <label style={{
+                      display: 'block', 
+                      marginBottom: '8px', 
+                      fontWeight: 'bold',
+                      fontSize: '14px',
+                      color: '#444'
+                    }}>
+                      Field Name
+                    </label>
                     <input
                       type="text"
                       placeholder="Enter field name"
@@ -1078,17 +1246,27 @@ export default function Admin() {
                         setFormData({...formData, customFields: updatedFields});
                       }}
                       style={{
-                        width: '90%',
+                        width: '100%',
                         padding: '10px',
                         border: '1px solid #ccc',
                         borderRadius: '4px',
-                        fontSize: '14px'
+                        fontSize: '14px',
+                        boxSizing: 'border-box'
                       }}
                     />
                   </div>
                   
-                  <div>
-                    <label style={{display: 'block', marginBottom: '5px', fontWeight: 'bold'}}>Field Type</label>
+                  {/* Field Type */}
+                  <div style={{gridColumn: '2 / 3'}}>
+                    <label style={{
+                      display: 'block', 
+                      marginBottom: '8px', 
+                      fontWeight: 'bold',
+                      fontSize: '14px',
+                      color: '#444'
+                    }}>
+                      Field Type
+                    </label>
                     <select
                       value={field.fieldType || 'text'}
                       onChange={(e) => {
@@ -1097,12 +1275,13 @@ export default function Admin() {
                         setFormData({...formData, customFields: updatedFields});
                       }}
                       style={{
-                        width: '90%',
+                        width: '100%',
                         padding: '10px',
                         border: '1px solid #ccc',
                         borderRadius: '4px',
                         fontSize: '14px',
-                        backgroundColor: '#fff'
+                        backgroundColor: '#fff',
+                        boxSizing: 'border-box'
                       }}
                     >
                       <option value="text">Text</option>
@@ -1114,8 +1293,15 @@ export default function Admin() {
                     </select>
                   </div>
                   
-                  <div>
-                    <label style={{display: 'block', marginBottom: '5px', fontWeight: 'bold'}}>
+                  {/* Placeholder/Help Text - Full Width */}
+                  <div style={{gridColumn: '1 / 3'}}>
+                    <label style={{
+                      display: 'block', 
+                      marginBottom: '8px', 
+                      fontWeight: 'bold',
+                      fontSize: '14px',
+                      color: '#444'
+                    }}>
                       {field.fieldType === 'date' ? 'Help Text' : 'Placeholder'}
                     </label>
                     <input
@@ -1132,59 +1318,70 @@ export default function Admin() {
                         setFormData({...formData, customFields: updatedFields});
                       }}
                       style={{
-                        width: '90%',
+                        width: '100%',
                         padding: '10px',
                         border: '1px solid #ccc',
                         borderRadius: '4px',
-                        fontSize: '14px'
+                        fontSize: '14px',
+                        boxSizing: 'border-box'
                       }}
                     />
                   </div>
                   
-                  <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
-                    <div style={{display: 'flex', alignItems: 'center'}}>
-                      <input
-                        type="checkbox"
-                        id={`required-${index}`}
-                        checked={field.isRequired || false}
-                        onChange={(e) => {
-                          const updatedFields = [...formData.customFields];
-                          updatedFields[index].isRequired = e.target.checked;
-                          setFormData({...formData, customFields: updatedFields});
-                        }}
-                        style={{marginRight: '8px'}}
-                      />
-                      <label htmlFor={`required-${index}`} style={{cursor: 'pointer'}}>Required Field</label>
-                    </div>
-                    
-                    <button 
-                      type="button"
-                      onClick={() => {
-                        const updatedFields = formData.customFields.filter((_, i) => i !== index);
+                  {/* Required Field Checkbox */}
+                  <div style={{
+                    gridColumn: '1 / 3',
+                    display: 'flex',
+                    alignItems: 'center',
+                    marginTop: '5px'
+                  }}>
+                    <input
+                      type="checkbox"
+                      id={`required-${index}`}
+                      checked={field.isRequired || false}
+                      onChange={(e) => {
+                        const updatedFields = [...formData.customFields];
+                        updatedFields[index].isRequired = e.target.checked;
                         setFormData({...formData, customFields: updatedFields});
                       }}
                       style={{
-                        backgroundColor: '#dc3545',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '4px',
-                        padding: '8px 12px',
+                        marginRight: '8px',
+                        width: '16px',
+                        height: '16px'
+                      }}
+                    />
+                    <label 
+                      htmlFor={`required-${index}`} 
+                      style={{
                         cursor: 'pointer',
-                        fontSize: '14px'
+                        fontSize: '14px',
+                        fontWeight: 'bold',
+                        color: field.isRequired ? '#28a745' : '#666'
                       }}
                     >
-                      Remove Field
-                    </button>
+                      {field.isRequired ? '✓ Required Field' : 'Make this field required'}
+                    </label>
                   </div>
                 </div>
                 
                 {field.fieldType === 'select' && (
                   <div style={{
-                    marginTop: '15px',
+                    marginTop: '20px',
                     paddingTop: '15px',
-                    borderTop: '1px dashed #ddd'
+                    borderTop: '1px dashed #ddd',
+                    backgroundColor: '#f5f5f5',
+                    padding: '15px',
+                    borderRadius: '5px'
                   }}>
-                    <label style={{display: 'block', marginBottom: '5px', fontWeight: 'bold'}}>Dropdown Options</label>
+                    <label style={{
+                      display: 'block', 
+                      marginBottom: '8px', 
+                      fontWeight: 'bold',
+                      fontSize: '14px',
+                      color: '#444'
+                    }}>
+                      Dropdown Options
+                    </label>
                     <input
                       type="text"
                       placeholder="Enter options separated by commas"
@@ -1195,64 +1392,115 @@ export default function Admin() {
                         setFormData({...formData, customFields: updatedFields});
                       }}
                       style={{
-                        width: '90%',
+                        width: '100%',
                         padding: '10px',
                         border: '1px solid #ccc',
                         borderRadius: '4px',
-                        fontSize: '14px'
+                        fontSize: '14px',
+                        boxSizing: 'border-box'
                       }}
                     />
+                  
+                    {/* Options Preview */}
+                    {Array.isArray(field.options) && field.options.length > 0 && (
+                      <div style={{
+                        marginTop: '10px',
+                        display: 'flex',
+                        flexWrap: 'wrap',
+                        gap: '5px'
+                      }}>
+                        {field.options.map((option, optIndex) => (
+                          <div key={optIndex} style={{
+                            backgroundColor: '#e9ecef',
+                            padding: '4px 8px',
+                            borderRadius: '4px',
+                            fontSize: '12px',
+                            display: 'inline-block'
+                          }}>
+                            {option}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    
+                    <p style={{
+                      fontSize: '0.8rem', 
+                      color: '#6c757d', 
+                      margin: '10px 0 0 0',
+                      fontStyle: 'italic'
+                    }}>
+                      Enter options separated by commas (e.g., Option 1, Option 2, Option 3)
+                    </p>
                   </div>
                 )}
               </div>
             ))}
             
-            <button 
-              type="button"
-              onClick={() => {
-                const newField = { 
-                  fieldName: '', 
-                  fieldType: 'text', 
-                  isRequired: false,
-                  placeholder: '',
-                  options: []
-                };
-                setFormData({
-                  ...formData, 
-                  customFields: [...(formData.customFields || []), newField]
-                });
-              }}
-              style={{
-                backgroundColor: '#28a745',
-                color: 'white',
-                border: 'none',
-                borderRadius: '30px',
-                padding: '12px 25px',
-                cursor: 'pointer',
-                fontSize: '15px',
-                fontWeight: 'bold',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                margin: '5px auto',
-                boxShadow: '0 4px 8px rgba(40, 167, 69, 0.3)',
-                transition: 'all 0.3s ease',
-                animation: 'pulse 2s infinite ease-in-out',
-                letterSpacing: '0.5px'
-              }}
-              onMouseOver={(e) => {
-                e.currentTarget.style.backgroundColor = '#218838';
-                e.currentTarget.style.transform = 'translateY(-2px)';
-                e.currentTarget.style.boxShadow = '0 6px 12px rgba(40, 167, 69, 0.4)';
-              }}
-              onMouseOut={(e) => {
-                e.currentTarget.style.backgroundColor = '#28a745';
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = '0 4px 8px rgba(40, 167, 69, 0.3)';
-              }}
-            >
-              + Add Custom Field
-            </button>
+            {/* Add Custom Field Button */}
+            <div style={{
+              display: 'flex',
+              justifyContent: 'center',
+              marginTop: '30px',
+              marginBottom: '20px'
+            }}>
+                <button 
+                type="button"
+                onClick={() => {
+                  const newField = { 
+                    fieldName: '', 
+                    fieldType: 'text', 
+                    isRequired: false,
+                    placeholder: '',
+                    options: []
+                  };
+                  setFormData({
+                    ...formData, 
+                    customFields: [...(formData.customFields || []), newField]
+                  });
+                }}
+                style={{
+                  backgroundColor: '#28a745',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '30px',
+                  padding: '12px 25px',
+                  cursor: 'pointer',
+                  fontSize: '15px',
+                  fontWeight: 'bold',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: '0 4px 8px rgba(40, 167, 69, 0.3)',
+                  transition: 'all 0.3s ease',
+                  letterSpacing: '0.5px'
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.backgroundColor = '#218838';
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.boxShadow = '0 6px 12px rgba(40, 167, 69, 0.4)';
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.backgroundColor = '#28a745';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 4px 8px rgba(40, 167, 69, 0.3)';
+                }}
+              >
+                <span style={{ marginRight: '8px', fontSize: '18px' }}>+</span>
+                Add Custom Field
+              </button>
+            </div>
+            
+            {/* Custom Fields Count */}
+            {formData.customFields && formData.customFields.length > 0 && (
+              <div style={{
+                textAlign: 'center',
+                fontSize: '14px',
+                color: '#6c757d',
+                marginBottom: '20px'
+              }}>
+                {formData.customFields.length} custom field{formData.customFields.length !== 1 ? 's' : ''} configured
+              </div>
+            )}
           </div>
           
           <div style={{
@@ -1365,72 +1613,104 @@ export default function Admin() {
                             
                             // Check if we have valid custom field values
                             let hasCustomFields = false;
+                            let customFieldEntries = [];
                             
+                            // First, check if the user has customFieldValues
                             if (user.customFieldValues) {
+                              console.log(`Custom field values type for ${user.name}:`, typeof user.customFieldValues);
+                              
                               if (typeof user.customFieldValues === 'object') {
                                 if (user.customFieldValues instanceof Map) {
                                   // It's a Map
                                   hasCustomFields = user.customFieldValues.size > 0;
+                                  customFieldEntries = Array.from(user.customFieldValues.entries());
                                 } else if (!Array.isArray(user.customFieldValues)) {
                                   // It's a plain object
                                   hasCustomFields = Object.keys(user.customFieldValues).length > 0;
+                                  customFieldEntries = Object.entries(user.customFieldValues);
+                                }
+                              } else if (typeof user.customFieldValues === 'string') {
+                                // Try to parse if it's a JSON string
+                                try {
+                                  const parsedValues = JSON.parse(user.customFieldValues);
+                                  if (typeof parsedValues === 'object' && !Array.isArray(parsedValues)) {
+                                    hasCustomFields = Object.keys(parsedValues).length > 0;
+                                    customFieldEntries = Object.entries(parsedValues);
+                                  }
+                                } catch (e) {
+                                  console.error("Error parsing customFieldValues string:", e);
                                 }
                               }
                             }
                             
-                            if (hasCustomFields) {
+                            // If the user has the hasCustomFields property, use that
+                            if (user.hasCustomFields !== undefined) {
+                              hasCustomFields = user.hasCustomFields;
+                            }
+                            
+                            // If customFieldEntries is empty but we know there should be custom fields,
+                            // try to extract them from the raw data
+                            if (customFieldEntries.length === 0 && user._doc && user._doc.customFieldValues) {
+                              try {
+                                const rawValues = user._doc.customFieldValues;
+                                if (typeof rawValues === 'object' && !Array.isArray(rawValues)) {
+                                  customFieldEntries = Object.entries(rawValues);
+                                  hasCustomFields = customFieldEntries.length > 0;
+                                }
+                              } catch (e) {
+                                console.error("Error extracting raw custom field values:", e);
+                              }
+                            }
+                            
+                            console.log(`Custom field entries for ${user.name}:`, customFieldEntries);
+                            
+                            if (hasCustomFields && customFieldEntries.length > 0) {
                               return (
                                 <div className="custom-fields-data">
-                                  {(() => {
-                                    // Convert Map to array of entries if needed
-                                    let entries = [];
-                                    
-                                    if (user.customFieldValues instanceof Map) {
-                                      // It's a Map, convert to array of entries
-                                      entries = Array.from(user.customFieldValues.entries());
-                                    } else {
-                                      // It's a plain object, convert to array of entries
-                                      entries = Object.entries(user.customFieldValues);
+                                  {customFieldEntries.map(([key, value], i) => {
+                                    // Skip null or undefined values
+                                    if (value === null || value === undefined) {
+                                      return null;
                                     }
                                     
-                                    return entries.map(([key, value], i) => {
-                                      // Skip null or undefined values
-                                      if (value === null || value === undefined) {
-                                        return null;
-                                      }
-                                      
-                                      // Check if the value is a date string (YYYY-MM-DD format)
-                                      const isDateValue = value && typeof value === 'string' && 
-                                        /^\d{4}-\d{2}-\d{2}$/.test(value);
-                                      
-                                      // Format date values nicely
-                                      let displayValue;
-                                      try {
-                                        displayValue = isDateValue 
-                                          ? new Date(value).toLocaleDateString('en-US', {
-                                              year: 'numeric', 
-                                              month: 'long', 
-                                              day: 'numeric'
-                                            })
-                                          : value.toString();
-                                      } catch (error) {
-                                        console.error("Error formatting value:", error);
-                                        displayValue = String(value);
-                                      }
-                                      
-                                      return (
-                                        <div key={i} className="custom-field-entry">
-                                          <strong>{key}:</strong> {displayValue}
-                                        </div>
-                                      );
-                                    });
-                                  })()}
+                                    // Check if the value is a date string (YYYY-MM-DD format)
+                                    const isDateValue = value && typeof value === 'string' && 
+                                      /^\d{4}-\d{2}-\d{2}$/.test(value);
+                                    
+                                    // Format date values nicely
+                                    let displayValue;
+                                    try {
+                                      displayValue = isDateValue 
+                                        ? new Date(value).toLocaleDateString('en-US', {
+                                            year: 'numeric', 
+                                            month: 'long', 
+                                            day: 'numeric'
+                                          })
+                                        : value.toString();
+                                    } catch (error) {
+                                      console.error("Error formatting value:", error);
+                                      displayValue = String(value);
+                                    }
+                                    
+                                    return (
+                                      <div key={i} className="custom-field-entry">
+                                        <strong>{key}:</strong> {displayValue}
+                                      </div>
+                                    );
+                                  })}
                                 </div>
                               );
                             } else {
+                              // Check if this is a registration for an event with custom fields
+                              const hasEventCustomFields = registrations.length > 0 && 
+                                registrations[0].eventCustomFields && 
+                                registrations[0].eventCustomFields.length > 0;
+                              
                               return (
                                 <span className="no-data">
-                                  {user.hasOwnProperty('customFieldValues') ? 'No custom data' : 'Loading custom fields...'}
+                                  {user.hasOwnProperty('customFieldValues') 
+                                    ? (hasEventCustomFields ? 'No custom data provided' : 'No custom fields for this event') 
+                                    : 'Loading custom fields...'}
                                 </span>
                               );
                             }

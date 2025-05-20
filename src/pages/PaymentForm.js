@@ -66,7 +66,7 @@ const CheckoutForm = ({ eventId, name, email, phone, eventDetails }) => {
       const uploadModal = document.createElement('div');
       uploadModal.className = 'custom-upload-modal';
       uploadModal.innerHTML = `
-        <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 20px; border-left: 4px solid #17a2b8;">
+        <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px;  border-left: 4px solid #17a2b8;">
           <h3 style="margin-top: 0; color: #17a2b8; font-size: 16px;">Payment Instructions</h3>
           <p style="margin-bottom: 10px;">Please pay the event fee using the following details:</p>
           

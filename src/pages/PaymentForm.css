@@ -630,7 +630,7 @@ body.dark-mode .payment-verification-form input[type="file"] {
 
 /* Custom File Upload Styles */
 .custom-upload-modal {
-  padding: 1rem;
+  /* padding: 1rem; */
   text-align: center;
 }
 
@@ -641,7 +641,7 @@ body.dark-mode .payment-verification-form input[type="file"] {
 }
 
 .custom-upload-modal p {
-  margin-bottom: 1.5rem;
+  /* margin-bottom: 1.5rem; */
   color: #666;
 }
 

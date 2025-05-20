@@ -381,7 +381,8 @@ export default function Register() {
           <h3 className="form-heading">Your Information</h3>
         
         <div className="form-group">
-          <label htmlFor="name">Full Name</label>
+          <p></p>
+          <label htmlFor="name">Full Name <span className="required-mark">*</span></label>
           <input
             type="text"
             id="name"
@@ -396,7 +397,8 @@ export default function Register() {
         </div>
 
         <div className="form-group">
-          <label htmlFor="email">Email Address</label>
+          <p></p>
+          <label htmlFor="email">Email Address <span className="required-mark">*</span></label>
           <input
             type="email"
             id="email"
@@ -414,7 +416,8 @@ export default function Register() {
         </div>
 
         <div className="form-group">
-          <label htmlFor="phone">Phone Number</label>
+          <p></p>
+          <label htmlFor="phone">Phone Number <span className="required-mark">*</span></label>
           <input
             type="tel"
             id="phone"
@@ -442,8 +445,9 @@ export default function Register() {
             
             {eventDetails.customFields.map((field, index) => (
               <div className="form-group" key={index}>
+                <p></p>
                 <label htmlFor={`custom_${field.fieldName}`}>
-                  {field.fieldName}
+                  {field.placeholder}
                   {field.isRequired && <span className="required-mark">*</span>}
                 </label>
                 
