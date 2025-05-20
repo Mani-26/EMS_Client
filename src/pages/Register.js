@@ -277,6 +277,11 @@ export default function Register() {
         // Check if this is a paid event that requires payment
         if (res.data.isPaid) {
           console.log("Paid event detected in success response");
+          
+          // Store custom field values in sessionStorage
+          sessionStorage.setItem('customFieldValues', JSON.stringify(formData.customFieldValues));
+          console.log("Stored custom field values:", formData.customFieldValues);
+          
           // Redirect to payment page with user details in the URL (including phone)
           navigate(`/payment/${eventId}/${encodeURIComponent(name)}/${encodeURIComponent(email)}/${encodeURIComponent(phone)}`);
           return;
@@ -285,6 +290,11 @@ export default function Register() {
         // Check if this is a paid event error
         if (error.response?.data?.isPaid) {
           console.log("Paid event detected in error response");
+          
+          // Store custom field values in sessionStorage
+          sessionStorage.setItem('customFieldValues', JSON.stringify(formData.customFieldValues));
+          console.log("Stored custom field values:", formData.customFieldValues);
+          
           // Redirect to payment page with user details in the URL (including phone)
           navigate(`/payment/${eventId}/${encodeURIComponent(name)}/${encodeURIComponent(email)}/${encodeURIComponent(phone)}`);
           return;

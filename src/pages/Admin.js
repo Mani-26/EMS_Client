@@ -14,6 +14,7 @@ export default function Admin() {
   const [isDarkMode, setIsDarkMode] = useState(false);
   
   // Function to generate input styles based on dark mode
+  // eslint-disable-next-line
   const getInputStyles = () => {
     return {
       width: '90%',
@@ -91,6 +92,8 @@ export default function Admin() {
     isFree: true,
     fee: "",
     featured: false,
+    upiId: "",
+    phoneNumber: "",
     customFields: []
   });
   
@@ -341,7 +344,8 @@ export default function Admin() {
 
   const handleSaveEvent = async (e) => {
     e.preventDefault();
-    const { name, date, description, venue, seatLimit, isFree, fee, featured } = formData;
+    // eslint-disable-next-line
+    const { name, date, description, venue, seatLimit, isFree, fee, featured, upiId, phoneNumber } = formData;
     if (!name || !date || !description || !venue || !seatLimit) {
       Swal.fire({
         icon: "warning",
@@ -357,6 +361,16 @@ export default function Admin() {
         icon: "warning",
         title: "Fee Required",
         text: "Please enter a valid fee amount for paid events.",
+      });
+      return;
+    }
+    
+    // Validate UPI ID and phone number for paid events
+    if (!isFree && (!upiId || !phoneNumber)) {
+      Swal.fire({
+        icon: "warning",
+        title: "Payment Details Required",
+        text: "Please enter UPI ID and phone number for paid events.",
       });
       return;
     }
@@ -610,17 +624,45 @@ export default function Admin() {
       // Scroll to top of the page
       window.scrollTo({ top: 0, behavior: 'smooth' });
       
+      // First, fetch the event details to get the custom fields
+      const eventRes = await axios.get(
+        `${process.env.REACT_APP_API_URL}/api/events/${eventId}`
+      );
+      
+      const eventCustomFields = eventRes.data.customFields || [];
+      console.log("Event custom fields:", eventCustomFields);
+      
+      // Then fetch the registrations
       const res = await axios.get(
         `${process.env.REACT_APP_API_URL}/api/events/${eventId}/registrations`
       );
       
+      // Process the registration data to ensure customFieldValues is properly handled
+      const processedRegistrations = res.data.map(registration => {
+        // Log the raw customFieldValues for debugging
+        console.log("Registration customFieldValues:", registration.customFieldValues);
+        
+        // Ensure customFieldValues is an object
+        const customFieldValues = registration.customFieldValues || {};
+        
+        return {
+          ...registration,
+          customFieldValues,
+          // Add a property to indicate if this registration has custom field values
+          hasCustomFields: Object.keys(customFieldValues).length > 0
+        };
+      });
+      
+      console.log("Processed registrations:", processedRegistrations);
+      
       // Set data after a slight delay to ensure scroll completes
       setTimeout(() => {
-        setRegistrations(res.data);
+        setRegistrations(processedRegistrations);
         setSelectedEventName(eventName);
         setShowRegistrations(true);
       }, 300);
     } catch (error) {
+      console.error("Error fetching registrations:", error);
       Swal.fire({
         icon: "error",
         title: "Oops...",
@@ -905,6 +947,58 @@ export default function Admin() {
                 </div>
               )}
             </div>
+
+            {/* Payment Details Section - Only shown for paid events */}
+            {formData.isFree === false && (
+              <div style={{
+                marginBottom: '15px',
+                padding: '15px',
+                backgroundColor: '#f8f9fa',
+                border: '1px solid #e9ecef',
+                borderRadius: '4px'
+              }}>
+                <label style={{display: 'block', marginBottom: '10px', fontWeight: 'bold'}}>Payment Details</label>
+                
+                <div style={{marginBottom: '15px'}}>
+                  <label style={{display: 'block', marginBottom: '5px', fontWeight: 'bold'}}>UPI ID</label>
+                  <input
+                    type="text"
+                    name="upiId"
+                    placeholder="Enter UPI ID for payments"
+                    value={formData.upiId || ""}
+                    onChange={handleInputChange}
+                    style={{
+                      width: '90%',
+                      padding: '10px',
+                      border: '1px solid #ccc',
+                      borderRadius: '4px',
+                      fontSize: '16px'
+                    }}
+                  />
+                </div>
+                
+                <div style={{marginBottom: '5px'}}>
+                  <label style={{display: 'block', marginBottom: '5px', fontWeight: 'bold'}}>Phone Number</label>
+                  <input
+                    type="text"
+                    name="phoneNumber"
+                    placeholder="Enter phone number for payments"
+                    value={formData.phoneNumber || ""}
+                    onChange={handleInputChange}
+                    style={{
+                      width: '90%',
+                      padding: '10px',
+                      border: '1px solid #ccc',
+                      borderRadius: '4px',
+                      fontSize: '16px'
+                    }}
+                  />
+                  <p style={{fontSize: '0.8rem', color: '#6c757d', margin: '5px 0 0 0'}}>
+                    This information will be displayed to users during payment
+                  </p>
+                </div>
+              </div>
+            )}
 
             {/* Featured Event Toggle */}
             <div style={{marginTop: '20px', marginBottom: '20px'}}>
@@ -1265,32 +1359,82 @@ export default function Admin() {
                         <td>{user.phone || 'N/A'}</td>
                         <td>{user.ticketId || 'N/A'}</td>
                         <td>
-                          {user.customFieldValues && Object.keys(user.customFieldValues).length > 0 ? (
-                            <div className="custom-fields-data">
-                              {Object.entries(user.customFieldValues).map(([key, value], i) => {
-                                // Check if the value is a date string (YYYY-MM-DD format)
-                                const isDateValue = value && typeof value === 'string' && 
-                                  /^\d{4}-\d{2}-\d{2}$/.test(value);
-                                
-                                // Format date values nicely
-                                const displayValue = isDateValue 
-                                  ? new Date(value).toLocaleDateString('en-US', {
-                                      year: 'numeric', 
-                                      month: 'long', 
-                                      day: 'numeric'
-                                    })
-                                  : value.toString();
-                                
-                                return (
-                                  <div key={i} className="custom-field-entry">
-                                    <strong>{key}:</strong> {displayValue}
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          ) : (
-                            <span className="no-data">No custom data</span>
-                          )}
+                          {(() => {
+                            // Debug log
+                            console.log(`Custom field values for ${user.name}:`, user.customFieldValues);
+                            
+                            // Check if we have valid custom field values
+                            let hasCustomFields = false;
+                            
+                            if (user.customFieldValues) {
+                              if (typeof user.customFieldValues === 'object') {
+                                if (user.customFieldValues instanceof Map) {
+                                  // It's a Map
+                                  hasCustomFields = user.customFieldValues.size > 0;
+                                } else if (!Array.isArray(user.customFieldValues)) {
+                                  // It's a plain object
+                                  hasCustomFields = Object.keys(user.customFieldValues).length > 0;
+                                }
+                              }
+                            }
+                            
+                            if (hasCustomFields) {
+                              return (
+                                <div className="custom-fields-data">
+                                  {(() => {
+                                    // Convert Map to array of entries if needed
+                                    let entries = [];
+                                    
+                                    if (user.customFieldValues instanceof Map) {
+                                      // It's a Map, convert to array of entries
+                                      entries = Array.from(user.customFieldValues.entries());
+                                    } else {
+                                      // It's a plain object, convert to array of entries
+                                      entries = Object.entries(user.customFieldValues);
+                                    }
+                                    
+                                    return entries.map(([key, value], i) => {
+                                      // Skip null or undefined values
+                                      if (value === null || value === undefined) {
+                                        return null;
+                                      }
+                                      
+                                      // Check if the value is a date string (YYYY-MM-DD format)
+                                      const isDateValue = value && typeof value === 'string' && 
+                                        /^\d{4}-\d{2}-\d{2}$/.test(value);
+                                      
+                                      // Format date values nicely
+                                      let displayValue;
+                                      try {
+                                        displayValue = isDateValue 
+                                          ? new Date(value).toLocaleDateString('en-US', {
+                                              year: 'numeric', 
+                                              month: 'long', 
+                                              day: 'numeric'
+                                            })
+                                          : value.toString();
+                                      } catch (error) {
+                                        console.error("Error formatting value:", error);
+                                        displayValue = String(value);
+                                      }
+                                      
+                                      return (
+                                        <div key={i} className="custom-field-entry">
+                                          <strong>{key}:</strong> {displayValue}
+                                        </div>
+                                      );
+                                    });
+                                  })()}
+                                </div>
+                              );
+                            } else {
+                              return (
+                                <span className="no-data">
+                                  {user.hasOwnProperty('customFieldValues') ? 'No custom data' : 'Loading custom fields...'}
+                                </span>
+                              );
+                            }
+                          })()}
                         </td>
                         <td>
                           <span className={`status-badge ${user.paymentStatus}`}>

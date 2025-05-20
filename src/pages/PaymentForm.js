@@ -45,101 +45,9 @@ const CheckoutForm = ({ eventId, name, email, phone, eventDetails }) => {
       // Add event listener for page unload/navigation
       window.addEventListener('beforeunload', cleanupRegistrationData);
       
-      // Define the functions that will be used by SweetAlert
-      const showTabFunction = (tabId) => {
-        // Hide all tab contents
-        document.querySelectorAll('.upi-tab-content').forEach(tab => {
-          tab.classList.remove('active');
-        });
-        
-        // Remove active class from all tab buttons
-        document.querySelectorAll('.upi-tab-btn').forEach(btn => {
-          btn.classList.remove('active');
-        });
-        
-        // Show the selected tab content
-        document.getElementById(tabId).classList.add('active');
-        
-        // Add active class to the clicked button
-        document.querySelector(`.upi-tab-btn[data-tab="${tabId}"]`).classList.add('active');
-      };
+      // Skip the payment interface and directly go to screenshot upload
+      verifyUpiPayment(data.transactionRef, data.upiId, data.amount, data.phoneNumber);
       
-      const copyUpiIdFunction = (upiId) => {
-        navigator.clipboard.writeText(upiId);
-        const copyBtn = document.querySelector('.copy-btn');
-        copyBtn.textContent = 'Copied!';
-        setTimeout(() => {
-          copyBtn.textContent = 'Copy';
-        }, 2000);
-      };
-
-      // Show UPI payment modal with multiple payment options
-      Swal.fire({
-        title: 'Pay with UPI',
-        html: `
-          <div class="upi-payment-modal">
-            <p>Pay ₹${data.eventDetails.fee} using any of these methods:</p>
-            
-            <div class="upi-tabs">
-              <button class="upi-tab-btn active" data-tab="qr-code" id="qr-code-tab">QR Code</button>
-              <button class="upi-tab-btn" data-tab="upi-id" id="upi-id-tab">UPI ID</button>
-            </div>
-            
-            <div id="qr-code" class="upi-tab-content active">
-              <p>Scan this QR code with any UPI app:</p>
-              <div class="qr-container">
-                <img src="${data.qrCode}" alt="UPI QR Code" class="upi-qr" onerror="this.onerror=null; this.src='${data.backupQrCode}';" />
-              </div>
-            </div>
-            
-            <div id="upi-id" class="upi-tab-content">
-              <p>Pay directly to this UPI ID:</p>
-              <div class="upi-id-container">
-                <div class="upi-id-value">${data.upiId}</div>
-                <button class="copy-btn" id="copy-upi-btn">
-                  Copy
-                </button>
-              </div>
-              <p class="upi-amount">Amount: ₹${data.amount}</p>
-            </div>
-            
-            <p class="upi-ref">Payment Reference: ${data.transactionRef}</p>
-            <div class="upi-buttons">
-              <a href="${data.gpayLink}" class="upi-app-button" target="_blank" style="background-color: #1a73e8; margin-right: 10px;">
-                Google Pay
-              </a>
-              <a href="${data.phonePeLink}" class="upi-app-button" target="_blank" style="background-color: #5f259f; margin-right: 10px;">
-                PhonePe
-              </a>
-              <a href="${data.upiLink}" class="upi-app-button" target="_blank" style="background-color: #28a745;">
-                Other UPI App
-              </a>
-            </div>
-            <p class="upi-instructions">After payment, click "I've Paid" below</p>
-          </div>
-        `,
-        showCancelButton: true,
-        confirmButtonText: "I've Paid",
-        cancelButtonText: 'Cancel',
-        confirmButtonColor: '#28a745',
-        cancelButtonColor: '#dc3545',
-        allowOutsideClick: false,
-        didOpen: () => {
-          // Add event listeners after the modal is opened
-          document.getElementById('qr-code-tab').addEventListener('click', () => showTabFunction('qr-code'));
-          document.getElementById('upi-id-tab').addEventListener('click', () => showTabFunction('upi-id'));
-          document.getElementById('copy-upi-btn').addEventListener('click', () => copyUpiIdFunction(data.upiId));
-        }
-      }).then((result) => {
-        if (result.isConfirmed) {
-          // User claims they've paid, verify payment
-          verifyUpiPayment(data.transactionRef);
-        } else {
-          // User canceled, clean up registration data
-          cleanupRegistrationData();
-          setIsProcessing(false);
-        }
-      });
     } catch (err) {
       setPaymentError(err.response?.data?.message || 'An error occurred during payment processing');
       setIsProcessing(false);
@@ -147,8 +55,10 @@ const CheckoutForm = ({ eventId, name, email, phone, eventDetails }) => {
   };
 
   // Function to verify UPI payment
-  const verifyUpiPayment = async (transactionRef) => {
+  const verifyUpiPayment = async (transactionRef, upiId, amount, phoneNumber) => {
     try {
+      console.log("Payment details:", { transactionRef, upiId, amount, phoneNumber });
+      
       // Create a file input for screenshot upload
       const fileInputId = 'payment-screenshot-input';
       
@@ -156,18 +66,53 @@ const CheckoutForm = ({ eventId, name, email, phone, eventDetails }) => {
       const uploadModal = document.createElement('div');
       uploadModal.className = 'custom-upload-modal';
       uploadModal.innerHTML = `
+        <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 20px; border-left: 4px solid #17a2b8;">
+          <h3 style="margin-top: 0; color: #17a2b8; font-size: 16px;">Payment Instructions</h3>
+          <p style="margin-bottom: 10px;">Please pay the event fee using the following details:</p>
+          
+          <div style="margin-bottom: 10px;">
+            <strong style="min-width: 100px;">Amount:</strong> <span style="color: green; font-weight: bolder;">₹${amount}</span>
+          </div>
+          
+          <div style="display: flex; flex-wrap: wrap; align-items: center; margin-bottom: 10px;">
+            <strong style="min-width: 100px; margin-bottom: 5px;">UPI ID:</strong> 
+            <div style="display: flex; align-items: center; background: #fff; padding: 5px 10px; border-radius: 4px; border: 1px solid #ddd; flex-grow: 1; width: 100%;">
+              <span style="flex-grow: 1; overflow-wrap: break-word; word-break: break-all;">${upiId || 'Not provided'}</span>
+              <button id="copy-upi-btn" style="background: #17a2b8; color: white; border: none; padding: 3px 8px; border-radius: 3px; cursor: pointer; font-size: 12px; white-space: nowrap; min-width: 50px; margin-left: 8px;">Copy</button>
+            </div>
+          </div>
+         
+          
+          ${phoneNumber ? `
+          <div style="display: flex; flex-wrap: wrap; align-items: center; margin-bottom: 10px;">
+            <strong style="min-width: 100px; margin-bottom: 5px;">Phone:</strong> 
+            <div style="display: flex; align-items: center; background: #fff; padding: 5px 10px; border-radius: 4px; border: 1px solid #ddd; flex-grow: 1; width: 100%;">
+              <span style="flex-grow: 1; overflow-wrap: break-word; word-break: break-all;">${phoneNumber}</span>
+              <button id="copy-phone-btn" style="background: #17a2b8; color: white; border: none; padding: 3px 8px; border-radius: 3px; cursor: pointer; font-size: 12px; white-space: nowrap; min-width: 50px; margin-left: 8px;">Copy</button>
+            </div>
+          </div>
+          ` : ''}
+          
+          <div style="margin-bottom: 10px;">
+            <strong style="min-width: 100px;">Reference:</strong> ${transactionRef}
+          </div>
+          
+          <p style="margin-top: 15px; font-size: 14px; color: #6c757d;">After making the payment, please upload the screenshot below.</p>
+        </div>
         
-        <p>Please upload a screenshot of your payment confirmation</p>
+        <p style="position: relative;">Please upload a screenshot of your payment confirmation </p>
+        <span class="upload-arrow" style="position: relative; display: inline-block; margin-left: 5px; font-size:30px">👇</span>
         <div class="file-upload-container">
-          <label for="${fileInputId}" class="file-upload-label">
-            <span class="upload-icon">📁</span>
-            <span class="upload-text">Click to select file</span>
+        <label for="${fileInputId}" class="file-upload-label">
+        <span class="upload-icon">📁</span>
+        <span class="upload-text">Click to select file</span>
           </label>
           <input type="file" id="${fileInputId}" accept="image/*" style="position: absolute; opacity: 0; width: 0.1px; height: 0.1px; overflow: hidden;">
           <div id="screenshot-error" style="color: red; font-size: 12px; text-align: left; display: none;">Payment screenshot is required</div>
+          <div id="upload-success" class="upload-success-message" style="display: none;">✅ Screenshot Selected</div>
         </div>
         <div id="preview-container" style="margin-top: 10px; display: none;">
-          <img id="screenshot-preview" style="max-width: 100%; max-height: 200px; border: 1px solid #ddd; border-radius: 4px;" />
+          <img id="screenshot-preview" />
         </div>
       `;
       
@@ -179,6 +124,8 @@ const CheckoutForm = ({ eventId, name, email, phone, eventDetails }) => {
       const previewImage = document.getElementById('screenshot-preview');
       const screenshotError = document.getElementById('screenshot-error');
       
+      const uploadSuccess = document.getElementById('upload-success');
+      
       fileInput.addEventListener('change', (e) => {
         const file = e.target.files[0];
         if (file) {
@@ -187,17 +134,19 @@ const CheckoutForm = ({ eventId, name, email, phone, eventDetails }) => {
             previewImage.src = e.target.result;
             previewContainer.style.display = 'block';
             screenshotError.style.display = 'none';
+            uploadSuccess.style.display = 'block';
           };
           reader.readAsDataURL(file);
         } else {
           previewContainer.style.display = 'none';
+          uploadSuccess.style.display = 'none';
         }
       });
       
       // Show SweetAlert with custom buttons
       const { value: formValues, dismiss } = await Swal.fire({
-        title: 'Upload Payment Screenshot',
-        text: 'Please upload a screenshot of your payment confirmation',
+        title: 'Make Payment & Upload Screenshot',
+        text: 'Please make the payment and upload a screenshot',
         html: uploadModal,
         showCancelButton: true,
         confirmButtonText: 'Verify Payment',
@@ -213,6 +162,31 @@ const CheckoutForm = ({ eventId, name, email, phone, eventDetails }) => {
           const previewContainer = document.querySelector('.swal2-container #preview-container');
           const previewImage = document.querySelector('.swal2-container #screenshot-preview');
           const screenshotError = document.querySelector('.swal2-container #screenshot-error');
+          const uploadSuccess = document.querySelector('.swal2-container #upload-success');
+          const copyUpiBtn = document.querySelector('.swal2-container #copy-upi-btn');
+          const copyPhoneBtn = document.querySelector('.swal2-container #copy-phone-btn');
+          
+          // Add copy UPI ID functionality
+          if (copyUpiBtn) {
+            copyUpiBtn.addEventListener('click', () => {
+              navigator.clipboard.writeText(upiId);
+              copyUpiBtn.textContent = 'Copied!';
+              setTimeout(() => {
+                copyUpiBtn.textContent = 'Copy';
+              }, 2000);
+            });
+          }
+          
+          // Add copy Phone Number functionality
+          if (copyPhoneBtn && phoneNumber) {
+            copyPhoneBtn.addEventListener('click', () => {
+              navigator.clipboard.writeText(phoneNumber);
+              copyPhoneBtn.textContent = 'Copied!';
+              setTimeout(() => {
+                copyPhoneBtn.textContent = 'Copy';
+              }, 2000);
+            });
+          }
           
           if (fileInput && fileLabel) {
             fileLabel.addEventListener('click', () => {
@@ -233,6 +207,9 @@ const CheckoutForm = ({ eventId, name, email, phone, eventDetails }) => {
                   if (screenshotError) {
                     screenshotError.style.display = 'none';
                   }
+                  if (uploadSuccess) {
+                    uploadSuccess.style.display = 'block';
+                  }
                   
                   // Update the label text to show the file name
                   const uploadText = document.querySelector('.swal2-container .upload-text');
@@ -243,6 +220,9 @@ const CheckoutForm = ({ eventId, name, email, phone, eventDetails }) => {
                 reader.readAsDataURL(file);
               } else if (previewContainer) {
                 previewContainer.style.display = 'none';
+                if (uploadSuccess) {
+                  uploadSuccess.style.display = 'none';
+                }
               }
             });
           }
@@ -340,18 +320,69 @@ const CheckoutForm = ({ eventId, name, email, phone, eventDetails }) => {
       // Get registration data from session storage
       const storedRegistrationData = JSON.parse(sessionStorage.getItem('registrationData'));
       
+      // Get custom field values from session storage
+      let customFieldValues = {};
+      try {
+        const storedCustomFields = sessionStorage.getItem('customFieldValues');
+        if (storedCustomFields) {
+          customFieldValues = JSON.parse(storedCustomFields);
+        }
+      } catch (error) {
+        console.error("Error parsing custom field values:", error);
+        customFieldValues = {};
+      }
+      
+      console.log("Retrieved custom field values:", customFieldValues);
+      
+      // Add custom field values to registration data
+      // Make sure customFieldValues is a plain object, not a Map
+      const plainCustomFields = {};
+      
+      // Convert any Map to a plain object
+      if (customFieldValues instanceof Map) {
+        // Convert Map to plain object
+        customFieldValues.forEach((value, key) => {
+          // Sanitize key by replacing dots with underscores
+          const sanitizedKey = key.replace(/\./g, '_');
+          plainCustomFields[sanitizedKey] = value;
+        });
+        console.log("Converted Map to plain object:", plainCustomFields);
+      } else if (typeof customFieldValues === 'object' && !Array.isArray(customFieldValues)) {
+        // It's already an object, copy the values
+        Object.entries(customFieldValues).forEach(([key, value]) => {
+          if (value !== null && value !== undefined) {
+            // Sanitize key by replacing dots with underscores
+            const sanitizedKey = key.replace(/\./g, '_');
+            plainCustomFields[sanitizedKey] = value;
+          }
+        });
+        console.log("Using existing object:", plainCustomFields);
+      } else {
+        console.log("Custom field values is not a Map or object:", customFieldValues);
+      }
+      
+      console.log("Plain custom fields:", plainCustomFields);
+      
+      const updatedRegistrationData = {
+        ...storedRegistrationData,
+        customFieldValues: plainCustomFields
+      };
+      
+      console.log("Updated registration data with custom fields:", updatedRegistrationData);
+      
       // Verify payment with the server
       const { data } = await axios.post(`${process.env.REACT_APP_API_URL}/api/upi/verify-payment`, {
         transactionRef,
         email,
         upiTransactionId: `AUTO-${Date.now()}`, // Generate an automatic transaction ID
         paymentScreenshot,
-        registrationData: storedRegistrationData // Include registration data
+        registrationData: updatedRegistrationData // Include registration data with custom fields
       });
 
       if (data.success) {
-        // Clear registration data from session storage
+        // Clear registration data and custom field values from session storage
         sessionStorage.removeItem('registrationData');
+        sessionStorage.removeItem('customFieldValues');
         
         // Payment screenshot received, pending verification
         Swal.fire({

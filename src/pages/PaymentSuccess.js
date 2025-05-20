@@ -110,6 +110,7 @@ const PaymentSuccess = () => {
               <p>Please note your Ticket ID for future reference.</p>
               <p>You will receive an email once your payment is verified.</p>
             </div>
+          
           )}
           <p className="payment-status">
             Status: <span className={ticketData.status === 'completed' ? 'status-completed' : 'status-pending'}>
@@ -129,7 +130,13 @@ const PaymentSuccess = () => {
               value={JSON.stringify({
                 ticketId: ticketData.ticketId,
                 transactionRef: transactionRef,
-                timestamp: new Date().toISOString()
+                timestamp: new Date().toISOString(),
+                status: ticketData.status,
+                eventId: ticketData.eventId,
+                paymentMethod: ticketData.paymentMethod,
+                attendeeName: location.state?.name,
+                attendeeEmail: location.state?.email,
+                attendeePhone: location.state?.phone
               })}
               size={200}
               level="H"

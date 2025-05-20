@@ -660,6 +660,7 @@ body.dark-mode .payment-verification-form input[type="file"] {
   cursor: pointer;
   transition: all 0.3s ease;
   background-color: rgba(0, 0, 0, 0.03);
+  position: relative;
 }
 
 .file-upload-label:hover {
@@ -703,9 +704,57 @@ body.dark-mode .custom-upload-modal p {
 #screenshot-preview {
   max-width: 100%;
   max-height: 200px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+  padding: 4px;
+  background: white;
   border: 1px solid #ddd;
+}
+
+body.dark-mode #screenshot-preview {
+  background: #333;
+  border: 1px solid #444;
+}
+
+/* Bouncing arrow animation */
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-20px);
+  }
+  60% {
+    transform: translateY(-10px);
+  }
+}
+
+.upload-arrow {
+  font-size: 20px;
+  animation: bounce 2s infinite;
+  color: #007bff;
+  vertical-align: middle;
+}
+
+body.dark-mode .upload-arrow {
+  color: #4dabf7;
+}
+
+/* Success message */
+.upload-success-message {
+  margin-top: 10px;
+  padding: 8px 12px;
+  background-color: rgba(40, 167, 69, 0.1);
+  border-left: 4px solid #28a745;
   border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  color: #28a745;
+  font-weight: 600;
+  display: none;
+}
+
+body.dark-mode .upload-success-message {
+  background-color: rgba(40, 167, 69, 0.2);
+  color: #2ecc71;
 }
 
 /* Responsive adjustments */
