@@ -182,6 +182,31 @@ export default function Register() {
     }
   };
 
+  // Function to store custom field values in session storage
+  // eslint-disable-next-line 
+  const storeCustomFieldValues = (values) => {
+    console.log("Storing custom field values in sessionStorage:", values);
+    sessionStorage.setItem('customFieldValues', JSON.stringify(values));
+    
+    // Verify the data was stored correctly
+    const storedData = sessionStorage.getItem('customFieldValues');
+    console.log("Verification - Raw stored custom fields:", storedData);
+    
+    if (storedData) {
+      try {
+        const parsedData = JSON.parse(storedData);
+        console.log("Verification - Parsed stored custom fields:", parsedData);
+        return true;
+      } catch (e) {
+        console.error("Error parsing stored custom fields:", e);
+        return false;
+      }
+    } else {
+      console.warn("WARNING: Failed to store custom field values in sessionStorage!");
+      return false;
+    }
+  };
+
   // Handle registration
   const handleRegister = async (e) => {
     e.preventDefault(); // Prevent default behavior if used in a form

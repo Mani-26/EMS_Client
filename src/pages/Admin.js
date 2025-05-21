@@ -94,6 +94,8 @@ export default function Admin() {
     featured: false,
     upiId: "",
     phoneNumber: "",
+    emailForNotifications: "",
+    appPassword: "",
     customFields: []
   });
   
@@ -359,7 +361,7 @@ export default function Admin() {
   const handleSaveEvent = async (e) => {
     e.preventDefault();
     // eslint-disable-next-line
-    const { name, date, description, venue, seatLimit, isFree, fee, featured, upiId, phoneNumber } = formData;
+    const { name, date, description, venue, seatLimit, isFree, fee, featured, upiId, phoneNumber, emailForNotifications, appPassword } = formData;
     if (!name || !date || !description || !venue || !seatLimit) {
       Swal.fire({
         icon: "warning",
@@ -385,6 +387,16 @@ export default function Admin() {
         icon: "warning",
         title: "Payment Details Required",
         text: "Please enter UPI ID and phone number for paid events.",
+      });
+      return;
+    }
+    
+    // Validate email and app password for all events
+    if (!emailForNotifications || !appPassword) {
+      Swal.fire({
+        icon: "warning",
+        title: "Email Configuration Required",
+        text: "Please enter email and app password for sending notifications.",
       });
       return;
     }
@@ -459,6 +471,23 @@ export default function Admin() {
             dataToSend.phoneNumber = phoneInput.value || "";
             // console.log("Retrieved phone number from input:", dataToSend.phoneNumber);
           }
+        }
+      }
+      
+      // Ensure email and app password are included for all events
+      if (!dataToSend.emailForNotifications) {
+        console.log("Email for notifications is missing, using value from input field");
+        const emailInput = document.querySelector('input[name="emailForNotifications"]');
+        if (emailInput) {
+          dataToSend.emailForNotifications = emailInput.value || "";
+        }
+      }
+      
+      if (!dataToSend.appPassword) {
+        console.log("App password is missing, using value from input field");
+        const passwordInput = document.querySelector('input[name="appPassword"]');
+        if (passwordInput) {
+          dataToSend.appPassword = passwordInput.value || "";
         }
       }
       
@@ -662,6 +691,7 @@ export default function Admin() {
     // console.log("Event phone number:", event.phoneNumber);
     
     // Create the form data object
+    //eslint-disable-next-line
     const newFormData = {
       name: event.name || "",
       date: formattedDate,
@@ -673,6 +703,8 @@ export default function Admin() {
       featured: event.featured !== undefined ? Boolean(event.featured) : false,
       upiId: event.upiId || "",
       phoneNumber: event.phoneNumber || "",
+      emailForNotifications: event.emailForNotifications || "",
+      appPassword: event.appPassword || "",
       customFields: formattedCustomFields
     };
     
@@ -693,6 +725,8 @@ export default function Admin() {
       featured: event.featured !== undefined ? Boolean(event.featured) : false,
       upiId: event.upiId || "",
       phoneNumber: event.phoneNumber || "",
+      emailForNotifications: event.emailForNotifications || "",
+      appPassword: event.appPassword || "",
       customFields: formattedCustomFields
     };
     
@@ -732,8 +766,8 @@ export default function Admin() {
       const eventCustomFields = res.data.eventCustomFields || [];
       const registrationsData = res.data.registrations || [];
       
-      // console.log("Event custom fields:", eventCustomFields);
-      // console.log("Registrations data:", registrationsData);
+      console.log("Event custom fields:", eventCustomFields);
+      console.log("Registrations data:", registrationsData);
       
       // Process the registration data to ensure customFieldValues is properly handled
       const processedRegistrations = registrationsData.map(registration => {
@@ -1070,6 +1104,59 @@ export default function Admin() {
                   />
                 </div>
               )}
+            </div>
+
+            {/* Email Notification Settings - For all events */}
+            <div style={{
+              marginBottom: '15px',
+              padding: '15px',
+              backgroundColor: '#f0f8ff',
+              border: '1px solid #b8daff',
+              borderRadius: '4px'
+            }}>
+              <label style={{display: 'block', marginBottom: '10px', fontWeight: 'bold'}}>Email Notification Settings</label>
+              
+              <div style={{marginBottom: '15px'}}>
+                <label style={{display: 'block', marginBottom: '5px', fontWeight: 'bold'}}>Email for Notifications</label>
+                <input
+                  type="email"
+                  name="emailForNotifications"
+                  placeholder="Enter email for sending notifications"
+                  value={formData.emailForNotifications || ""}
+                  onChange={handleInputChange}
+                  style={{
+                    width: '90%',
+                    padding: '10px',
+                    border: '1px solid #ccc',
+                    borderRadius: '4px',
+                    fontSize: '16px'
+                  }}
+                />
+                <p style={{fontSize: '0.8rem', color: '#6c757d', margin: '5px 0 0 0'}}>
+                  This email will be used to send registration and payment verification emails
+                </p>
+              </div>
+
+              <div style={{marginBottom: '5px'}}>
+                <label style={{display: 'block', marginBottom: '5px', fontWeight: 'bold'}}>App Password</label>
+                <input
+                  type="password"
+                  name="appPassword"
+                  placeholder="Enter app password for the email"
+                  value={formData.appPassword || ""}
+                  onChange={handleInputChange}
+                  style={{
+                    width: '90%',
+                    padding: '10px',
+                    border: '1px solid #ccc',
+                    borderRadius: '4px',
+                    fontSize: '16px'
+                  }}
+                />
+                <p style={{fontSize: '0.8rem', color: '#6c757d', margin: '5px 0 0 0'}}>
+                  App password for the email account (for Gmail, create one at Google Account &gt Security &gt App passwords)
+                </p>
+              </div>
             </div>
 
             {/* Payment Details Section - Only shown for paid events */}

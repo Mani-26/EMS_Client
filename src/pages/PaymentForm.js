@@ -13,8 +13,17 @@ const CheckoutForm = ({ eventId, name, email, phone, eventDetails }) => {
   const submissionRef = useRef(false); // Prevent multiple submissions
 
   // Cleanup function for registration data
+  //eslint-disable-next-line
   const cleanupRegistrationData = () => {
     console.log('Cleaning up registration data');
+    // Only remove the data after successful payment verification
+    // Don't remove customFieldValues until payment is verified
+    sessionStorage.removeItem('registrationData');
+  };
+  
+  // Final cleanup function - only called after successful payment verification
+  const finalCleanup = () => {
+    console.log('Final cleanup - removing all registration data');
     sessionStorage.removeItem('registrationData');
     sessionStorage.removeItem('customFieldValues');
   };
@@ -24,8 +33,10 @@ const CheckoutForm = ({ eventId, name, email, phone, eventDetails }) => {
     console.log('CheckoutForm: Mounting component');
     return () => {
       console.log('CheckoutForm: Unmounting component');
-      cleanupRegistrationData();
-      window.removeEventListener('beforeunload', cleanupRegistrationData);
+      // IMPORTANT: DO NOT remove custom field values on unmount
+      // Only remove registration data
+      console.log('Component unmounting - preserving custom field values');
+      sessionStorage.removeItem('registrationData');
     };
   }, []);
 
@@ -43,16 +54,39 @@ const CheckoutForm = ({ eventId, name, email, phone, eventDetails }) => {
 
     try {
       console.log('handleSubmit: Initiating payment creation');
+      
+      // Get custom field values from session storage
+      let customFieldValues = {};
+      try {
+        console.log('handleSubmit: Checking session storage for custom field values');
+        console.log('handleSubmit: All session storage keys:', Object.keys(sessionStorage));
+        
+        const storedCustomFields = sessionStorage.getItem('customFieldValues');
+        console.log('handleSubmit: Raw stored custom fields:', storedCustomFields);
+        
+        if (storedCustomFields) {
+          customFieldValues = JSON.parse(storedCustomFields);
+          console.log('handleSubmit: Retrieved custom field values from session storage:', customFieldValues);
+        } else {
+          console.warn('handleSubmit: No custom field values found in session storage!');
+        }
+      } catch (error) {
+        console.error('handleSubmit: Error parsing custom field values:', error);
+      }
+      
       const { data } = await axios.post(`${process.env.REACT_APP_API_URL}/api/upi/create-payment`, {
         eventId,
         name,
         email,
-        phone
+        phone,
+        customFieldValues
       });
 
       // console.log('handleSubmit: Payment creation successful, transactionRef:', data.transactionRef);
       sessionStorage.setItem('registrationData', JSON.stringify(data.registrationData));
-      window.addEventListener('beforeunload', cleanupRegistrationData);
+      // IMPORTANT: We need to preserve custom field values throughout the payment process
+      // DO NOT add any event listeners that might remove them
+      console.log('Payment initiated - custom field values must be preserved');
 
       await verifyUpiPayment(data.transactionRef, data.upiId, data.amount, data.phoneNumber);
     } catch (err) {
@@ -103,7 +137,8 @@ const CheckoutForm = ({ eventId, name, email, phone, eventDetails }) => {
 
         if (checkResponse.data.success && checkResponse.data.paymentScreenshotUrl) {
           // console.log('verifyUpiPayment: Payment screenshot exists:', checkResponse.data);
-          cleanupRegistrationData();
+          // Use finalCleanup to remove all registration data after successful verification
+          finalCleanup();
 
           Swal.fire({
             icon: 'info',
@@ -365,12 +400,23 @@ const CheckoutForm = ({ eventId, name, email, phone, eventDetails }) => {
           text: 'Please wait while we process your payment screenshot...'
         });
 
+        console.log('verifyUpiPayment: Checking session storage');
+        console.log('verifyUpiPayment: All session storage keys:', Object.keys(sessionStorage));
+        
         const storedRegistrationData = JSON.parse(sessionStorage.getItem('registrationData') || '{}');
+        console.log('verifyUpiPayment: Retrieved registration data:', storedRegistrationData);
+        
         let customFieldValues = {};
         try {
+          console.log('verifyUpiPayment: Checking for custom field values');
           const storedCustomFields = sessionStorage.getItem('customFieldValues');
+          console.log('verifyUpiPayment: Raw stored custom fields:', storedCustomFields);
+          
           if (storedCustomFields) {
             customFieldValues = JSON.parse(storedCustomFields);
+            console.log('verifyUpiPayment: Parsed custom field values:', customFieldValues);
+          } else {
+            console.warn('verifyUpiPayment: No custom field values found in session storage!');
           }
         } catch (error) {
           console.error('verifyUpiPayment: Error parsing custom field values:', error);
@@ -380,8 +426,8 @@ const CheckoutForm = ({ eventId, name, email, phone, eventDetails }) => {
         if (typeof customFieldValues === 'object' && !Array.isArray(customFieldValues)) {
           Object.entries(customFieldValues).forEach(([key, value]) => {
             if (value !== null && value !== undefined) {
-              const sanitizedKey = key.replace(/\./g, '_');
-              plainCustomFields[sanitizedKey] = value;
+              // Don't sanitize the key - keep it exactly as in the event definition
+              plainCustomFields[key] = value;
             }
           });
         }
@@ -392,6 +438,9 @@ const CheckoutForm = ({ eventId, name, email, phone, eventDetails }) => {
         };
 
         console.log('verifyUpiPayment: Sending verification request');
+        console.log('Custom field values being sent:', plainCustomFields);
+        console.log('Updated registration data:', updatedRegistrationData);
+        
         const { data } = await axios.post(`${process.env.REACT_APP_API_URL}/api/upi/verify-payment`, {
           transactionRef,
           email,
@@ -406,7 +455,22 @@ const CheckoutForm = ({ eventId, name, email, phone, eventDetails }) => {
         });
 
         // console.log('verifyUpiPayment: Verification successful:', data);
-        cleanupRegistrationData();
+        // Payment verification successful - now it's safe to clean up
+        console.log('Payment verification successful - cleaning up session storage');
+        
+        // Store the custom field values in localStorage as a backup
+        try {
+          const customFieldsBackup = sessionStorage.getItem('customFieldValues');
+          if (customFieldsBackup) {
+            localStorage.setItem(`payment_custom_fields_${transactionRef}`, customFieldsBackup);
+            console.log('Backed up custom field values to localStorage');
+          }
+        } catch (e) {
+          console.error('Error backing up custom field values:', e);
+        }
+        
+        // Now it's safe to clean up
+        // finalCleanup();
         window.lastPaymentScreenshot = null;
         window.isProcessingUpload = false;
 
