@@ -238,10 +238,9 @@ const CheckoutForm = ({ eventId, name, email, phone, eventDetails }) => {
           }
 
           if (fileInput && fileLabel) {
-            fileLabel.addEventListener('click', () => {
-              fileInput.click();
-            });
-
+            // Remove the click event on the label to prevent double file explorer opening
+            // The label's 'for' attribute will handle opening the file explorer once
+            
             fileInput.addEventListener('change', (e) => {
               const file = e.target.files[0];
               if (file) {

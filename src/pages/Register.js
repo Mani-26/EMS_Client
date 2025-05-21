@@ -438,7 +438,7 @@ export default function Register() {
         </div> {/* End of personal information section */}
 
         {/* Custom Fields Section */}
-        {console.log("Rendering custom fields:", eventDetails?.customFields)}
+        {/* {console.log("Rendering custom fields:", eventDetails?.customFields)} */}
         {eventDetails && eventDetails.customFields && eventDetails.customFields.length > 0 ? (
           <div className="custom-fields-section form-section">
             <h3 className="form-heading">Additional Information</h3>
